@@ -1,0 +1,30 @@
+id: MNT-API-005
+version: 0.1.0
+title: 公開している API は互換性を守り、壊すときは移行期間を置く
+summary: 公開 API・データ形式を変えるときは後方互換を保ち、壊すなら非推奨の期間と移行手順を用意する
+level: default
+styles: { maintainable: 1.0, extensibility: 0.8 }
+applies_when: { languages: [typescript, python], layers: [api_handler, library, data_schema] }
+not_when:
+  - まだ誰にも公開していない API
+rationale: >
+  利用者のいる API を突然変えると、利用者側が一斉に壊れる。
+  移行期間を置けば、利用者は自分の都合で移行できる。
+checks:
+  static: []   # 変更前後の比較が必要なため、1つのファイルの検査では判定できない
+  external:
+    - { engine: api-extractor, rule: "TypeScript の公開 API の差分" }
+    - { engine: griffe, rule: "griffe check で Python の公開 API の破壊的変更を検出" }
+    - { engine: openapi-diff, rule: "HTTP API の破壊的変更を検出" }
+  review: >
+    公開している関数・型・エンドポイント・DB のカラム・イベントの形式を、削除・改名・意味の変更をしていないか。
+    するなら、非推奨の印（@deprecated など）・移行先・削除予定の版が書かれているか。
+    DB のスキーマ変更は、新旧のコードが両方動く順序（追加 → 移行 → 削除）になっているか
+  tests: 旧い形式のリクエスト・データで、引き続き動くことを確かめる
+example:
+  bad: "GET /users の name を fullName に改名して、そのまま公開"
+  good: "fullName を追加し、name を @deprecated にして両方返す。次のメジャー版で name を削除"
+tensions: [{ axis: abstraction, direction: more }]
+evidence: { tools: [api-extractor, griffe, openapi-diff], repos: [] }
+confidence: null
+validation: 未評価

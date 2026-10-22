@@ -1,0 +1,27 @@
+{
+  "name": "ai-code-wisdom",
+  "version": "0.2.0",
+  "private": true,
+  "description": "ユーザーが選んだ設計スタイルを、AI が開発から保守まで守り続けるための原則パック・検査・Claude Code プラグイン",
+  "type": "module",
+  "bin": {
+    "wisdom": "bin/wisdom"
+  },
+  "engines": {
+    "node": ">=23.6"
+  },
+  "scripts": {
+    "test": "node --test \"test/**/*.test.ts\"",
+    "test:rules": "node scripts/test-rules.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "eval": "node eval/run.ts"
+  },
+  "dependencies": {
+    "@ast-grep/cli": "0.45.3",
+    "yaml": "2.8.4"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.9",
+    "typescript": "6.0.3"
+  }
+}

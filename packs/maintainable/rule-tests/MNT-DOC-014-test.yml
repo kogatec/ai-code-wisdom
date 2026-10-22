@@ -1,0 +1,30 @@
+id: mnt-doc-014-ts-export-without-doc
+valid:
+  - |
+    /** 税込価格を返す。price は税抜きの円。 */
+    export function withTax(price: number): number { return price * TAX_RATE; }
+  - function helper() { return 1; }
+  - export const VERSION = "1.0.0";
+invalid:
+  - 'export function withTax(price: number): number { return price * TAX_RATE; }'
+  - 'export const withTax = (price: number) => price * TAX_RATE;'
+  - |
+    // 税込価格
+    export class Cart {}
+---
+id: mnt-doc-014-py-public-without-docstring
+valid:
+  - |
+    def with_tax(price: int) -> int:
+        """税込価格を返す。price は税抜きの円。"""
+        return price * TAX_RATE
+  - |
+    def _helper():
+        return 1
+invalid:
+  - |
+    def with_tax(price: int) -> int:
+        return price * TAX_RATE
+  - |
+    class Cart:
+        pass

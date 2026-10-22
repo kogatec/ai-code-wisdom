@@ -1,0 +1,22 @@
+id: MNT-DOC-014
+version: 0.1.0
+title: 公開する部品と、設計の判断を文書に残す
+summary: 公開関数・クラスに説明を書き、設計上の判断は理由と却下した案を記録する
+level: advisory
+styles: { maintainable: 1.0 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when:
+  - 名前と型だけで十分に分かる小さな関数
+rationale: >
+  コードから分かるのは「どうなっているか」まで。「なぜそうしたか」を残さないと、
+  後の人は理由を知らずに前提を壊すか、怖くて何も変えられなくなる。
+checks:
+  static: [mnt-doc-014-ts-export-without-doc, mnt-doc-014-py-public-without-docstring]
+  review: 設計を変える判断（ライブラリの選定・データ構造の変更・トレードオフ）について、理由が .wisdom/decisions.md や ADR に書かれているか
+example:
+  bad: "export function withTax(price) {...}  // 単位も丸め方も分からない"
+  good: "/** 税込価格（円・切り捨て）を返す。price は税抜きの円 */ export function withTax(price) {...}"
+tensions: []
+evidence: { tools: [pylint:C0116, eslint-plugin-jsdoc:require-jsdoc], repos: [] }
+confidence: null
+validation: 未評価

@@ -1,0 +1,103 @@
+id: sec-crypto-008-ts-math-random-secret
+language: TypeScript
+severity: error
+message: Math.random() で秘密の値（トークン・ID など）を作っています
+note: crypto.randomBytes / crypto.randomUUID / crypto.getRandomValues を使ってください。
+metadata: { principle: SEC-CRYPTO-008 }
+rule:
+  pattern: Math.random()
+  inside:
+    stopBy: end
+    any:
+      - kind: variable_declarator
+        has: { field: name, regex: '(?i)(token|secret|nonce|salt|passw|otp|api_?key|session|csrf|invite|reset|verification)' }
+      - kind: pair
+        has: { field: key, regex: '(?i)(token|secret|nonce|salt|passw|otp|api_?key|session|csrf|invite|reset|verification)' }
+      - kind: function_declaration
+        has: { field: name, regex: '(?i)(token|secret|nonce|salt|passw|otp|api_?key|session|csrf|invite|reset|verification)' }
+      - kind: method_definition
+        has: { field: name, regex: '(?i)(token|secret|nonce|salt|passw|otp|api_?key|session|csrf|invite|reset|verification)' }
+---
+id: sec-crypto-008-ts-weak-hash
+language: TypeScript
+severity: warning
+message: MD5 / SHA-1 を使っています
+note: パスワードには argon2 / scrypt / bcrypt、改ざん検知には SHA-256 以上か HMAC を使ってください。チェックサム用途なら、その旨をコメントに書いてください。
+metadata: { principle: SEC-CRYPTO-008 }
+rule:
+  kind: call_expression
+  all:
+    - has: { field: function, regex: '(^|\.)createHash$' }
+    - has:
+        field: arguments
+        has: { kind: string, regex: '(?i)^[''"](md5|sha1)[''"]$' }
+---
+id: sec-crypto-008-ts-weak-cipher
+language: TypeScript
+severity: error
+message: 安全でない暗号の使い方（createCipher / ECB モード）です
+note: crypto.createCipheriv で AES-256-GCM を使い、IV は毎回ランダムに作ってください。
+metadata: { principle: SEC-CRYPTO-008 }
+rule:
+  any:
+    - kind: call_expression
+      has: { field: function, regex: '(^|\.)createCipher$' }
+    - kind: string
+      regex: '(?i)^[''"]aes-\d+-ecb[''"]$'
+---
+id: sec-crypto-008-ts-tls-off
+language: TypeScript
+severity: error
+message: TLS 証明書の検証を無効にしています
+note: 検証は有効のままにしてください。社内 CA なら ca オプションで証明書を渡してください。
+metadata: { principle: SEC-CRYPTO-008 }
+rule:
+  any:
+    - kind: pair
+      regex: '^rejectUnauthorized\s*:\s*false$'
+    - pattern: process.env.NODE_TLS_REJECT_UNAUTHORIZED = $V
+---
+id: sec-crypto-008-py-random-secret
+language: Python
+severity: error
+message: random モジュールで秘密の値（トークン・ID など）を作っています
+note: secrets.token_urlsafe / secrets.token_hex / secrets.randbelow を使ってください。
+metadata: { principle: SEC-CRYPTO-008 }
+rule:
+  kind: call
+  has: { field: function, regex: '^random\.(random|randint|randrange|choice|choices|sample|getrandbits|uniform)$' }
+  inside:
+    stopBy: end
+    any:
+      - kind: assignment
+        has: { field: left, regex: '(?i)(token|secret|nonce|salt|passw|otp|api_?key|session|csrf|invite|reset|verification)' }
+      - kind: function_definition
+        has: { field: name, regex: '(?i)(token|secret|nonce|salt|passw|otp|api_?key|session|csrf|invite|reset|verification)' }
+---
+id: sec-crypto-008-py-weak-hash
+language: Python
+severity: warning
+message: MD5 / SHA-1 を使っています
+note: パスワードには argon2 / scrypt / bcrypt、改ざん検知には SHA-256 以上か HMAC を使ってください。チェックサム用途なら usedforsecurity=False を付けてください。
+metadata: { principle: SEC-CRYPTO-008 }
+rule:
+  kind: call
+  all:
+    - has: { field: function, regex: '^hashlib\.(md5|sha1)$' }
+    - not:
+        has:
+          field: arguments
+          has: { kind: keyword_argument, regex: '^usedforsecurity\s*=\s*False$' }
+---
+id: sec-crypto-008-py-tls-off
+language: Python
+severity: error
+message: TLS 証明書の検証を無効にしています
+note: 検証は有効のままにしてください。社内 CA なら verify に CA 証明書のパスを渡してください。
+metadata: { principle: SEC-CRYPTO-008 }
+rule:
+  any:
+    - kind: keyword_argument
+      regex: '^verify\s*=\s*False$'
+    - pattern: ssl._create_unverified_context($$$)
+    - pattern: ssl.CERT_NONE

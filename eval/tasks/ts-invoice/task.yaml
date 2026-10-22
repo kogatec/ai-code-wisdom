@@ -1,0 +1,33 @@
+id: ts-invoice
+title: 請求金額の計算
+language: typescript
+profile:
+  primary: simple-readable
+  secondary:
+    - maintainable
+# 隠しテストの件数（通過率の分母。--dry-run で実際の件数と一致するか確かめる）
+# 堅牢さテストはなし（読みやすさの違反数で比べる）
+test:
+  functional: 13
+  robustness: 0
+steps:
+  - |
+    請求金額を計算する関数を作ってください。
+
+    - `src/invoice.ts` に `calcInvoice(items, customer, coupon?)` を export してください。
+    - `items` は `{ sku: string; unitPrice: number; quantity: number }[]` です（`unitPrice` は円で整数、`quantity` は個数）。`customer` は `{ rank: "regular" | "silver" | "gold" }`、`coupon` は省略できる文字列です。
+    - 戻り値は `{ subtotal: number; discount: number; total: number }` です。
+      - `subtotal`：割引前の商品代金の合計（各商品の `unitPrice × quantity` の合計）
+      - `total`：割引後に支払う金額
+      - `discount`：`subtotal - total`
+    - 割引のルールは次のとおりです。上から順に、前の結果へ重ねて適用します。
+      1. 商品ごとに、`quantity` が 10 個以上なら、その商品の代金を 3% 引きます。
+      2. 会員ランクで、さらに割り引きます。`silver` は 5%、`gold` は 10%、`regular` は割引なしです。
+      3. クーポン `"WELCOME"` は、割引前の `subtotal` が 3000 円以上のときだけ、ここまでの金額から 500 円引きます。ほかのクーポンは無視します。
+      4. 途中の計算では丸めず、最後の金額の 1 円未満を切り捨てます。
+  - |
+    送料を追加してください。
+
+    - 戻り値に `shipping` を加えて、`{ subtotal, discount, shipping, total }` にします。
+    - 送料は、割引後の商品代金（今までの `total`）が 5000 円未満なら 600 円、5000 円以上なら 0 円です。ただし `gold` の会員は、金額にかかわらず 0 円です。
+    - `total` は、割引後の商品代金に送料を足した金額にします。`discount` は今までどおり、`subtotal` から割引後の商品代金を引いた額です（送料は含めません）。

@@ -1,0 +1,40 @@
+id: mnt-err-007-ts-throw-literal
+valid:
+  - throw new NotFoundError("user");
+  - throw err;
+invalid:
+  - throw "user not found";
+  - 'throw `user ${id} not found`;'
+---
+id: mnt-err-007-ts-message-compare
+valid:
+  - if (err instanceof NotFoundError) { return null; }
+  - if (err.code === "ENOENT") { return null; }
+invalid:
+  - if (err.message === "Not Found") { return null; }
+  - if (e.message.includes("timeout")) { retry(); }
+---
+id: mnt-err-007-py-str-compare
+valid:
+  - |
+    try:
+        load()
+    except TimeoutError:
+        retry()
+invalid:
+  - |
+    try:
+        load()
+    except Exception as e:
+        if "timeout" in str(e):
+            retry()
+  - |
+    if str(err) == "not found":
+        pass
+---
+id: mnt-err-007-py-generic-exception
+valid:
+  - raise ValueError("price must be positive")
+  - raise OrderNotFound(order_id)
+invalid:
+  - raise Exception("price must be positive")

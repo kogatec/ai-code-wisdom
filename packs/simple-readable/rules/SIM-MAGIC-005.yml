@@ -1,0 +1,42 @@
+id: sim-magic-005-ts-magic-number
+language: TypeScript
+severity: info
+message: 意味の分からない数値（マジックナンバー）が計算・比較・引数に直接書かれています
+note: 'const SESSION_TIMEOUT_MS = 30_000 のように、意味が分かる名前の定数にしてください。'
+metadata: { principle: SIM-MAGIC-005 }
+rule:
+  kind: number
+  not:
+    any:
+      - regex: '^(0|1|2|10|100|1000|0\.5)$'
+      - inside:
+          stopBy: end
+          kind: variable_declarator
+          has: { field: name, regex: '^[A-Z][A-Z0-9_]*$' }
+  inside:
+    any:
+      - kind: binary_expression
+      - kind: arguments
+---
+id: sim-magic-005-py-magic-number
+language: Python
+severity: info
+message: 意味の分からない数値（マジックナンバー）が計算・比較・引数に直接書かれています
+note: SESSION_TIMEOUT_SEC = 30 のように、意味が分かる名前の定数にしてください。
+metadata: { principle: SIM-MAGIC-005 }
+rule:
+  any:
+    - kind: integer
+    - kind: float
+  not:
+    any:
+      - regex: '^(0|1|2|10|100|1000|0\.5|1\.0|0\.0)$'
+      - inside:
+          stopBy: end
+          kind: assignment
+          has: { field: left, regex: '^[A-Z][A-Z0-9_]*$' }
+  inside:
+    any:
+      - kind: binary_operator
+      - kind: comparison_operator
+      - kind: argument_list

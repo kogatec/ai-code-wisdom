@@ -1,0 +1,27 @@
+id: RES-DATA-015
+version: 0.1.0
+title: 途中で失敗しても、データが中途半端な状態で残らないようにする
+summary: 複数の書き込みはトランザクションでまとめ、外部への副作用には冪等キーを付ける
+level: default
+styles: { security_resilience: 1.0, type_safety: 0.5 }
+applies_when:
+  languages: [typescript, python]
+  layers: [service, data_access]
+not_when: []
+rationale: >
+  2つ目の書き込みで失敗すると、1つ目だけが残った不整合な状態になる。
+  不整合なデータは、あとで見つけて直すのが最も難しい障害の1つ。
+checks:
+  static: []   # どの書き込みが1つの単位かは業務次第のため、機械では判定できない
+  review: >
+    1つの操作で複数の行・テーブルに書き込む場合、トランザクションでまとめているか。
+    DB とメール送信・決済など外部への副作用を組み合わせる場合、二重実行や片方だけの成功に備えているか（冪等キー、アウトボックスなど）。
+    同時に更新されたときの扱い（楽観ロックなど）が決まっているか
+  tests: 2つ目の書き込みを失敗させたとき、1つ目が取り消されることを確かめる。同じリクエストを2回送っても、結果が1回分になることを確かめる
+example:
+  bad: "await db.debit(from, amt); await db.credit(to, amt)"
+  good: "await db.transaction(async (tx) => { await tx.debit(from, amt); await tx.credit(to, amt) })"
+tensions: [{ axis: abstraction, direction: more }]
+evidence: { standards: [CWE-362], repos: [] }
+confidence: null
+validation: 未評価

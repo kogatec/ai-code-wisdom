@@ -1,0 +1,24 @@
+id: ts-rate-client
+title: 為替レート取得クライアント
+language: typescript
+profile:
+  primary: security-resilience
+  secondary:
+    - maintainable
+# 隠しテストの件数（通過率の分母。--dry-run で実際の件数と一致するか確かめる）
+test:
+  functional: 8
+  robustness: 7
+steps:
+  - |
+    為替レートを取得する関数を作ってください。
+
+    - `src/rates.ts` に `getRate(from, to, deps?)` を export してください。`async` 関数で、レート（数値）を返します。
+    - `from` と `to` は通貨コードです（例：`"USD"` と `"JPY"`）。レートは `GET https://api.example-rates.test/v1/rates?from=USD&to=JPY` に問い合わせて取得します。応答は JSON で、`{ "rate": 150.25 }` の形です。
+    - `deps` は省略できるオブジェクトで、`{ fetch?: typeof fetch }` の形です。`deps.fetch` があればそれを使い、なければ標準の `fetch` を使います（テストで差し替えられるようにするためです）。
+    - 取得に成功したら、そのレートを通貨の組み合わせごとにメモリへ保存しておきます。取得に失敗したとき（通信エラーや、成功以外の HTTP 応答）は、保存してある前回の値を返してください。前回の値がなければ例外を投げます。
+  - |
+    `getRate` に再試行を入れてください。
+
+    - 通信エラーや、サーバー側の一時的な失敗（503 など）で取得できなかったときは、少し待ってからやり直し、成功したらその値を返します。
+    - やり直しても取得できなかったときは、今までどおり保存してある前回の値を返します（なければ例外）。

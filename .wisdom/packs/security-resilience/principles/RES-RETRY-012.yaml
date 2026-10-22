@@ -1,0 +1,27 @@
+id: RES-RETRY-012
+version: 0.1.0
+title: リトライは、繰り返しても安全な操作だけに、回数の上限と間隔の伸長を付けて行う
+summary: リトライは冪等な操作だけ、上限回数・指数バックオフ・ジッター付きで行う
+level: default
+styles: { security_resilience: 1.0 }
+applies_when:
+  languages: [typescript, python]
+  layers: [external_call]
+not_when: []
+rationale: >
+  上限のないリトライは、相手が落ちているときに負荷をかけ続け、復旧を妨げる。
+  冪等でない操作（支払いなど）を繰り返すと、二重に実行される。
+checks:
+  static: [res-retry-012-ts-unbounded-retry, res-retry-012-py-unbounded-retry]
+  review: >
+    リトライする操作が冪等か（冪等キーがあるか）。
+    一時的なエラー（タイムアウト・5xx・429）だけをリトライし、4xx はリトライしていないか。
+    Retry-After を尊重しているか
+  tests: 一時的な失敗のあとに成功すること、失敗が続くと上限回数で止まること、400 ではリトライしないことを確かめる
+example:
+  bad: "while (true) { try { return await call() } catch { await sleep(1000) } }"
+  good: "return retry(call, { retries: 4, backoff: 'exponential', jitter: true, retryOn: isTransient })"
+tensions: [{ axis: simplicity, direction: less }]
+evidence: { standards: [], repos: [] }
+confidence: null
+validation: 未評価

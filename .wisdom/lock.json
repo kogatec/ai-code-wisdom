@@ -1,0 +1,64 @@
+{
+  "generated_by": "ai-code-wisdom 0.2.0",
+  "packs": {
+    "maintainable": {
+      "version": "0.1.1",
+      "hash": "cf6dcf47be985a47"
+    },
+    "security-resilience": {
+      "version": "0.1.1",
+      "hash": "43fdde0de56dafbf"
+    },
+    "simple-readable": {
+      "version": "0.1.0",
+      "hash": "a0cc93c2598c057d"
+    }
+  },
+  "principles": {
+    "SEC-IV-001": "0.1.0",
+    "SEC-INJ-002": "0.1.0",
+    "SEC-INJ-003": "0.1.0",
+    "SEC-PATH-004": "0.1.0",
+    "SEC-SECRET-005": "0.1.0",
+    "SEC-LEAK-006": "0.1.0",
+    "SEC-AUTHZ-007": "0.1.0",
+    "SEC-CRYPTO-008": "0.1.0",
+    "SEC-DESER-009": "0.1.0",
+    "MNT-TEST-003": "0.1.0",
+    "MNT-CHANGE-015": "0.1.0",
+    "MNT-DEP-002": "0.1.0",
+    "MNT-MOD-001": "0.1.0",
+    "MNT-API-005": "0.1.0",
+    "MNT-TYPE-006": "0.1.0",
+    "MNT-ERR-007": "0.1.0",
+    "MNT-SIDE-012": "0.1.0",
+    "MNT-STATE-013": "0.1.0",
+    "MNT-TEST-004": "0.1.0",
+    "MNT-CONFIG-008": "0.1.0",
+    "MNT-DEPS-010": "0.1.0",
+    "MNT-LOG-011": "0.1.0",
+    "RES-ERR-010": "0.1.0",
+    "RES-TIMEOUT-011": "0.1.0",
+    "RES-RETRY-012": "0.1.0",
+    "RES-ASYNC-013": "0.1.0",
+    "RES-ISO-014": "0.1.0",
+    "RES-DATA-015": "0.1.0",
+    "SIM-FN-001": "0.1.0",
+    "SIM-NEST-002": "0.1.0",
+    "SIM-ABS-010": "0.1.0",
+    "SIM-PARAM-003": "0.1.0",
+    "SIM-CLEVER-012": "0.1.0",
+    "SIM-DUP-011": "0.1.0",
+    "SIM-DEAD-009": "0.1.0",
+    "SIM-SCOPE-015": "0.1.0",
+    "MNT-DOC-014": "0.1.0",
+    "MNT-TODO-009": "0.1.0",
+    "SIM-NAME-004": "0.1.0",
+    "SIM-COMMENT-013": "0.1.0",
+    "SIM-MAGIC-005": "0.1.0",
+    "SIM-COND-006": "0.1.0",
+    "SIM-ELSE-008": "0.1.0",
+    "SIM-NEG-007": "0.1.0",
+    "SIM-STD-014": "0.1.0"
+  }
+}

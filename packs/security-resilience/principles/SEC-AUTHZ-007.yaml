@@ -1,0 +1,27 @@
+id: SEC-AUTHZ-007
+version: 0.1.0
+title: 権限の確認はサーバー側で、すべての操作に対して行い、迷ったら拒否する
+summary: 権限はサーバー側で毎回確かめ、既定は拒否、確認に失敗したら拒否する
+level: mandatory
+styles: { security_resilience: 1.0 }
+applies_when:
+  languages: [typescript, python]
+  layers: [api_handler, service]
+not_when: []
+rationale: >
+  画面で隠すだけの制限は、API を直接呼べば回避できる。
+  既定を許可にすると、確認を書き忘れた操作がすべて穴になる。
+checks:
+  static: []   # 何が正しい権限かはアプリごとに違うため、機械では判定できない
+  review: >
+    新しいエンドポイント・操作のすべてに権限の確認があるか。
+    対象のデータが本人（または所属組織）のものか、ID だけで判断していないか。
+    権限の確認で例外が起きたとき、許可ではなく拒否になるか
+  tests: 他人のリソース ID を指定すると 403 / 404 になること、未ログインで 401 になることを、エンドポイントごとに確かめる
+example:
+  bad: "app.get('/orders/:id', (req, res) => res.json(db.order(req.params.id)))"
+  good: "const order = await orders.findOwnedBy(user.id, id); if (!order) return res.sendStatus(404)"
+tensions: [{ axis: abstraction, direction: more }]
+evidence: { standards: [CWE-862, CWE-639], repos: [] }
+confidence: null
+validation: 未評価

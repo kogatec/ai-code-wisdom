@@ -1,0 +1,22 @@
+id: MNT-TEST-004
+version: 0.1.0
+title: テストは独立させ、毎回同じ結果になるようにする
+summary: テストは時刻・乱数・通信・実行順に頼らず、.only や理由のない skip を残さない
+level: default
+styles: { maintainable: 1.0, testing: 1.0 }
+applies_when: { languages: [typescript, python], layers: [test] }
+not_when: []
+rationale: >
+  ときどき失敗するテストは、やがて誰も結果を信じなくなり、本当の失敗も見逃される。
+  .only や skip が残ると、テストが実行されていないことに気づけない。
+checks:
+  static: [mnt-test-004-ts-focused-test, mnt-test-004-ts-skipped-test, mnt-test-004-py-skip-without-reason, mnt-test-004-py-sleep-in-test]
+  review: テストが実際の外部サービスや現在時刻に依存していないか。テスト同士がデータを共有していないか
+  tests: テストを順番を変えて実行しても（pytest-randomly など）、結果が変わらないことを確かめる
+example:
+  bad: "time.sleep(2); assert job.done"
+  good: "with freeze_time('2026-01-01'): ...  /  await waitFor(() => expect(job.done).toBe(true))"
+tensions: []
+evidence: { tools: [eslint-plugin-jest:no-focused-tests, eslint-plugin-jest:no-disabled-tests], repos: [] }
+confidence: null
+validation: 未評価

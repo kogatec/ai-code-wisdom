@@ -1,0 +1,19 @@
+id: sim-neg-007-ts-negative-name
+valid:
+  - const isEnabled = flags.has("x");
+  - const isNothing = value == null;
+  - 'function isNotation(s: string) { return s.startsWith("#"); }'
+invalid:
+  - const isNotReady = !server.ready;
+  - 'function hasNoItems(cart: Cart) { return cart.items.length === 0; }'
+  - 'interface Props { isNotVisible: boolean }'
+---
+id: sim-neg-007-py-negative-name
+valid:
+  - is_enabled = "x" in flags
+  - is_nothing = value is None
+invalid:
+  - is_not_ready = not server.ready
+  - |
+    def has_no_items(cart):
+        return not cart.items

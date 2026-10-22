@@ -1,0 +1,56 @@
+id: simple-readable
+version: 0.1.0
+name: シンプル・可読性重視型
+description: 初めて読む人が、上から順に読むだけで理解できるコードを書く
+values: [短い関数, 浅い入れ子, 意味の分かる名前, 素直な書き方, 不要な抽象化をしない]
+suited_for:
+  - 少人数で速く動かしたいプロダクト・試作
+  - メンバーの入れ替わりが多いチーム
+  - 学習用・社内ツール
+tradeoffs:
+  - 拡張の余地を先に作らないため、大きな変更のときに構造を作り直すことがある
+  - 抽象化を後回しにするので、規模が大きくなったら保守性・長期運用重視型を副スタイルに加えるとよい
+languages: [typescript, python]
+
+# このパックに mandatory の原則はない。違反は AI に知らせるが、止めない
+enforcement:
+  block: なし（mandatory の原則を含まないため）
+  warn: すべての違反を AI に知らせる。severity が info のものは、作業の報告にまとめて載せるだけにする
+  allow_inline: '理由を書いたコメント（wisdom-allow <原則ID>: 理由）がある箇所は、例外として監査の一覧に載せる'
+
+# 静的検査の対象外にするパス（テストは読みやすさの基準が異なるため）
+exclude_paths: ["**/*.test.ts", "**/*.spec.ts", "**/tests/**", "**/test_*.py", "**/*_test.py"]
+
+# L0（常駐ルール）に載せる順。summary を1行ずつ使う
+principles:
+  - SIM-FN-001
+  - SIM-NEST-002
+  - SIM-ABS-010
+  - SIM-NAME-004
+  - SIM-PARAM-003
+  - SIM-CLEVER-012
+  - SIM-DUP-011
+  - SIM-DEAD-009
+  - SIM-COMMENT-013
+  - SIM-MAGIC-005
+  - SIM-COND-006
+  - SIM-ELSE-008
+  - SIM-NEG-007
+  - SIM-STD-014
+  - SIM-SCOPE-015
+
+# しきい値（今はルールに直接書いている。core を作るときに、ここからルールを生成する）
+thresholds:
+  function_max_lines: 60
+  nesting_max_depth: 3
+  max_params: 4
+  condition_max_operators: 2
+
+requires:
+  ast-grep: ">=0.45"
+  optional: [tsc, ruff, eslint, jscpd]
+
+verification:
+  rule_tests: 静的ルール30本すべて、テストケース（検出すべき例・検出してはいけない例）を通過（ast-grep 0.45.3）
+  effect: 未評価（評価の仕組みを作ってから測る）
+  evidence: ESLint・Pylint など既存ツールの対応ルールへの参照のみ。リポジトリからの根拠は Phase 3 で付ける

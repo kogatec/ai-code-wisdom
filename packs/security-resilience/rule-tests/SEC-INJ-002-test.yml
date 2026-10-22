@@ -1,0 +1,35 @@
+id: sec-inj-002-ts-sql-concat
+valid:
+  - 'const q = "Select a file: " + name;'
+  - 'db.query("SELECT * FROM users WHERE id = $1", [id]);'
+invalid:
+  - 'db.query("SELECT * FROM users WHERE id = " + id);'
+  - 'const q = "DELETE FROM orders WHERE id = ''" + id + "''";'
+---
+id: sec-inj-002-ts-sql-template
+valid:
+  - 'const rows = await sql`SELECT * FROM users WHERE id = ${id}`;'
+  - 'const rows = await prisma.$queryRaw`SELECT * FROM users WHERE id = ${id}`;'
+  - 'const msg = `Selected ${n} items from list`;'
+  - 'const q = `SELECT * FROM users`;'
+invalid:
+  - 'db.query(`SELECT * FROM users WHERE id = ${id}`);'
+  - 'const q = `UPDATE users SET name = ''${name}'' WHERE id = 1`;'
+  - 'await prisma.$queryRawUnsafe(`SELECT * FROM users WHERE id = ${id}`);'
+---
+id: sec-inj-002-py-sql-fstring
+valid:
+  - 'cur.execute("SELECT * FROM users WHERE id = %s", (uid,))'
+  - 'msg = f"Hello {name}"'
+invalid:
+  - 'cur.execute(f"SELECT * FROM users WHERE id = {uid}")'
+  - 'q = f"DELETE FROM orders WHERE id = {oid}"'
+---
+id: sec-inj-002-py-sql-format
+valid:
+  - 'cur.execute("SELECT * FROM t WHERE a = %s", (a,))'
+  - 's = "total: %d" % n'
+invalid:
+  - 'cur.execute("SELECT * FROM users WHERE name = ''%s''" % name)'
+  - 'q = "DELETE FROM t WHERE id = " + str(i)'
+  - 'q = "SELECT * FROM t WHERE a = {}".format(a)'

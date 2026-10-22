@@ -1,0 +1,24 @@
+id: SEC-INJ-003
+version: 0.1.0
+title: シェルや eval に、組み立てた文字列を渡さない
+summary: コマンドは引数の配列で渡し、eval / new Function は使わない
+level: mandatory
+styles: { security_resilience: 1.0 }
+applies_when:
+  languages: [typescript, python]
+  layers: [any]
+not_when: []
+rationale: >
+  シェルや eval に渡した文字列は、その中身がコードとして実行される。
+  コマンドと引数を分けて渡せば、引数はただの値として扱われる。
+checks:
+  static: [sec-inj-003-ts-eval, sec-inj-003-ts-shell-string, sec-inj-003-ts-shell-true, sec-inj-003-py-shell-true, sec-inj-003-py-os-system, sec-inj-003-py-eval]
+  review: 外部の値をコマンドに渡す場合、許可リストか、引数の配列で渡しているか
+  tests: "; rm -rf や $(...) を含む値を渡しても、余分なコマンドが実行されないことを確かめる"
+example:
+  bad: "exec(`git log ${branch}`)"
+  good: "execFile('git', ['log', branch])"
+tensions: []
+evidence: { standards: [CWE-78, CWE-95], repos: [] }
+confidence: null
+validation: 未評価

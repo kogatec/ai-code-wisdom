@@ -1,0 +1,21 @@
+id: MNT-TODO-009
+version: 0.1.0
+title: 後回しにした作業は、追跡できる形で残す
+summary: TODO / FIXME には担当者か課題番号を書き、課題管理で追跡する
+level: advisory
+styles: { maintainable: 1.0 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when: []
+rationale: >
+  誰のものでもない TODO は、ほとんど直されないまま積み上がる。
+  課題番号があれば、優先度を付けて計画に載せられる。
+checks:
+  static: [mnt-todo-009-ts-untracked-todo, mnt-todo-009-py-untracked-todo]
+  review: 今回の変更で直すべきもの（明らかな不具合）を TODO で先送りしていないか
+example:
+  bad: "// TODO 返金の部分対応"
+  good: "// TODO(PAY-42): 返金の部分対応。現状は全額返金のみ"
+tensions: []
+evidence: { tools: [eslint:no-warning-comments, flake8-todos], repos: [] }
+confidence: null
+validation: 未評価

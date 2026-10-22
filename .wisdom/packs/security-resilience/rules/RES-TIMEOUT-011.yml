@@ -1,0 +1,44 @@
+id: res-timeout-011-ts-fetch
+language: TypeScript
+severity: warning
+message: fetch にタイムアウトがありません
+note: '{ signal: AbortSignal.timeout(ミリ秒) } を渡してください。相手が応答しないと、呼び出し側が止まり続けます。'
+metadata: { principle: RES-TIMEOUT-011 }
+rule:
+  kind: call_expression
+  all:
+    - has: { field: function, regex: '^fetch$' }
+    - has:
+        field: arguments
+        any:
+          - not: { has: { nthChild: 2 } }
+          - has:
+              nthChild: 2
+              kind: object
+              not:
+                has:
+                  any:
+                    - kind: pair
+                      has: { field: key, regex: '^signal$' }
+                    - kind: shorthand_property_identifier
+                      regex: '^signal$'
+                    - kind: spread_element
+---
+id: res-timeout-011-py-http
+language: Python
+severity: warning
+message: HTTP 呼び出しにタイムアウトがありません
+note: timeout=(接続秒, 読み取り秒) を渡してください。requests は既定ではタイムアウトしません。
+metadata: { principle: RES-TIMEOUT-011 }
+rule:
+  kind: call
+  all:
+    - has: { field: function, regex: '^(requests\.(get|post|put|patch|delete|head|options|request)|urlopen|urllib\.request\.urlopen)$' }
+    - not:
+        has:
+          field: arguments
+          has:
+            any:
+              - kind: keyword_argument
+                regex: '^timeout\s*='
+              - kind: dictionary_splat

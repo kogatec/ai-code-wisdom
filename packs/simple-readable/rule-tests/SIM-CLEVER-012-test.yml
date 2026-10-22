@@ -1,0 +1,25 @@
+id: sim-clever-012-ts-nested-ternary
+valid:
+  - 'const label = isAdmin ? "admin" : "user";'
+invalid:
+  - 'const label = isAdmin ? "admin" : isOwner ? "owner" : "user";'
+---
+id: sim-clever-012-ts-bit-trick
+valid:
+  - const n = Math.trunc(x);
+  - const mask = ~flags;
+invalid:
+  - const n = ~~x;
+---
+id: sim-clever-012-py-nested-conditional
+valid:
+  - label = "admin" if is_admin else "user"
+invalid:
+  - label = "admin" if is_admin else "owner" if is_owner else "user"
+---
+id: sim-clever-012-py-multi-for-comprehension
+valid:
+  - names = [u.name for u in users if u.active]
+invalid:
+  - cells = [c for row in grid for c in row]
+  - pairs = {(a, b) for a in xs if a for b in ys}

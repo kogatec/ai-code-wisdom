@@ -1,0 +1,25 @@
+id: MNT-DEPS-010
+version: 0.1.0
+title: 依存を固定し、非推奨の API を放置しない
+summary: 依存はロックファイルで固定して定期的に更新し、非推奨の API は早めに置き換える
+level: default
+styles: { maintainable: 1.0, security_resilience: 0.7 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when: []
+rationale: >
+  依存を固定しないと、同じコードでも環境によって動きが変わる。
+  非推奨の API や古い依存を放置すると、いつか一度に大量の書き換えを迫られる。
+checks:
+  static: [mnt-deps-010-ts-deprecated-api, mnt-deps-010-py-deprecated-api, mnt-deps-010-py-typing-alias]
+  external:
+    - { engine: project, rule: "ロックファイル（package-lock.json / pnpm-lock.yaml / uv.lock / poetry.lock）がコミットされている" }
+    - { engine: npm-audit / pip-audit, rule: "既知の脆弱性のある依存がない" }
+    - { engine: renovate / dependabot, rule: "依存の更新が自動で提案される" }
+  review: 新しい依存を追加する場合、保守が続いているか・ライセンスが問題ないか・標準ライブラリで代わりにならないか
+example:
+  bad: "datetime.utcnow()"
+  good: "datetime.now(timezone.utc)"
+tensions: []
+evidence: { tools: [ruff:DTZ003, ruff:UP006, npm-audit, pip-audit], repos: [] }
+confidence: null
+validation: 未評価

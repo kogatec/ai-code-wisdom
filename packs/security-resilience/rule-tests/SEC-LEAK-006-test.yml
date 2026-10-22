@@ -1,0 +1,34 @@
+id: sec-leak-006-ts-log-secret
+valid:
+  - console.log("token refreshed");
+  - 'logger.info({ userId, token: redact(token) });'
+  - 'logger.info({ tokenCount });'
+invalid:
+  - console.log("login", user.password);
+  - 'logger.info({ userId, token });'
+  - logger.debug(req.headers.authorization);
+---
+id: sec-leak-006-ts-stack-to-client
+valid:
+  - 'res.status(500).json({ error: "internal error", id: requestId });'
+  - logger.error(err.stack);
+invalid:
+  - 'res.status(500).json({ error: err.stack });'
+  - res.send(e.stack);
+---
+id: sec-leak-006-py-log-secret
+valid:
+  - logger.info("token refreshed")
+  - logger.info("user %s", redact(token))
+  - logger.info("count %d", token_count)
+invalid:
+  - logger.info("login %s %s", user, password)
+  - print(f"token={token}")
+  - logging.debug(user.password)
+---
+id: sec-leak-006-py-traceback-response
+valid:
+  - logger.error(traceback.format_exc())
+invalid:
+  - return jsonify(error=traceback.format_exc()), 500
+  - return traceback.format_exc()

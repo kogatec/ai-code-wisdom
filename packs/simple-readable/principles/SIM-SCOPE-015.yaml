@@ -1,0 +1,24 @@
+id: SIM-SCOPE-015
+version: 0.1.0
+title: 変数の有効範囲を狭くし、紛らわしい名前で隠さない
+summary: var を使わず const を基本にし、組み込みの名前（list / id / type）を変数に使わない
+level: default
+styles: { simple_readable: 1.0, maintainable: 0.5 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when: []
+rationale: >
+  有効範囲が広い変数や再代入される変数は、どこで値が変わるかを追う必要がある。
+  組み込みの名前を上書きすると、その後で組み込み関数を使うときに思わぬ不具合になる。
+checks:
+  static: [sim-scope-015-ts-var, sim-scope-015-py-shadow-builtin]
+  external:
+    - { engine: eslint, rule: prefer-const }
+  review: 変数が、使う場所よりずっと前で宣言されていないか
+  tests: なし
+example:
+  bad: "def get_user(id): list = load(); ..."
+  good: "def get_user(user_id): users = load(); ..."
+tensions: []
+evidence: { tools: [eslint:no-var, pylint:W0622], repos: [] }
+confidence: null
+validation: 未評価

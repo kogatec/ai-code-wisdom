@@ -1,0 +1,26 @@
+id: mnt-dep-002-ts-deep-relative-import
+language: TypeScript
+severity: warning
+message: 3階層以上さかのぼる相対 import です
+note: 遠いモジュールに直接依存しています。公開窓口（index.ts）経由で import するか、パスの別名（@/domain など）を使い、依存の向きが層の決まりに沿っているか確かめてください。
+metadata: { principle: MNT-DEP-002 }
+rule:
+  kind: string
+  regex: '^[''"](\.\./){3,}'
+  inside:
+    stopBy: end
+    any:
+      - kind: import_statement
+      - kind: export_statement
+      - kind: call_expression
+        has: { field: function, regex: '^(require|import)$' }
+---
+id: mnt-dep-002-py-deep-relative-import
+language: Python
+severity: warning
+message: 3階層以上さかのぼる相対 import です
+note: 遠いモジュールに直接依存しています。パッケージの公開窓口（__init__.py）経由か絶対 import にし、依存の向きが層の決まりに沿っているか確かめてください。
+metadata: { principle: MNT-DEP-002 }
+rule:
+  kind: import_from_statement
+  regex: '^from\s+\.{3,}'

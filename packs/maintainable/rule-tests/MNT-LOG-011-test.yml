@@ -1,0 +1,20 @@
+id: mnt-log-011-ts-console
+valid:
+  - 'logger.info({ orderId }, "order created");'
+  - console.error(err);
+invalid:
+  - console.log("order created", orderId);
+---
+id: mnt-log-011-py-print
+valid:
+  - 'logger.info("order created", extra={"order_id": order_id})'
+  - |
+    if __name__ == "__main__":
+        print(run())
+  - |
+    def main():
+        print(run())
+invalid:
+  - |
+    def create_order(cart):
+        print("order created")

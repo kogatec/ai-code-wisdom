@@ -1,0 +1,44 @@
+id: sec-inj-003-ts-eval
+valid:
+  - evaluate(x);
+  - JSON.parse(text);
+invalid:
+  - eval(userCode);
+  - const f = new Function("a", body);
+---
+id: sec-inj-003-ts-shell-string
+valid:
+  - execFile("git", ["log", branch]);
+  - exec("git status");
+  - const m = /a(b)/.exec(text);
+invalid:
+  - 'exec(`git log ${branch}`);'
+  - child_process.execSync("rm -rf " + dir);
+---
+id: sec-inj-003-ts-shell-true
+valid:
+  - spawn("git", ["log"], { cwd });
+invalid:
+  - 'spawn(cmd, args, { shell: true });'
+---
+id: sec-inj-003-py-shell-true
+valid:
+  - subprocess.run(["git", "log", branch])
+  - subprocess.run("ls -la", shell=True)
+invalid:
+  - subprocess.run(f"git log {branch}", shell=True)
+  - subprocess.call(cmd, shell=True)
+---
+id: sec-inj-003-py-os-system
+valid:
+  - os.system("clear")
+invalid:
+  - os.system("rm -rf " + path)
+  - os.popen(cmd)
+---
+id: sec-inj-003-py-eval
+valid:
+  - value = ast.literal_eval(text)
+invalid:
+  - result = eval(expr)
+  - exec(code)

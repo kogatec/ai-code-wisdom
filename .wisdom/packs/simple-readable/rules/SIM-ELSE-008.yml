@@ -1,0 +1,40 @@
+id: sim-else-008-ts-else-after-return
+language: TypeScript
+severity: info
+message: return / throw の後に else を書いています
+note: else を外し、その中身を if の後ろに書いてください。入れ子が1段浅くなります。
+metadata: { principle: SIM-ELSE-008 }
+rule:
+  kind: if_statement
+  all:
+    - has:
+        field: consequence
+        any:
+          - kind: return_statement
+          - kind: throw_statement
+          - has: { kind: return_statement }
+          - has: { kind: throw_statement }
+    - has:
+        field: alternative
+        kind: else_clause
+        not: { has: { kind: if_statement } }
+    # else if の連なりの一部は対象外（全体で1つの分岐として読めるため）
+    - not: { inside: { kind: else_clause } }
+---
+id: sim-else-008-py-else-after-return
+language: Python
+severity: info
+message: return / raise の後に else を書いています
+note: else を外し、その中身を if の後ろに書いてください。入れ子が1段浅くなります。
+metadata: { principle: SIM-ELSE-008 }
+rule:
+  kind: if_statement
+  all:
+    - has:
+        field: consequence
+        has:
+          any:
+            - kind: return_statement
+            - kind: raise_statement
+    - has: { kind: else_clause }
+    - not: { has: { kind: elif_clause } }

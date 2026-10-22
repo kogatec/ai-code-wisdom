@@ -1,0 +1,21 @@
+# AI Code Wisdom の設定（チームで共有するため、コミットしてください）
+#   primary   : 主スタイル（最も優先する設計スタイル）
+#   secondary : 副スタイルと重み（0〜1。大きいほど優先）
+#   phase     : production（本番）/ prototype（試作。advisory の原則と info の検査を外す）
+#   review    : auto（大きな変更の後だけレビュー役を呼ぶ）/ always / off
+#   overrides.disable : 無効にする原則 ID（mandatory は無効にできません）
+#   overrides.paths   : パスごとに無効にする原則 ID
+#   exclude_paths     : 検査から外すパス（glob）
+version: 1
+primary: maintainable
+secondary:
+  - pack: security-resilience
+    weight: 0.5
+  - pack: simple-readable
+    weight: 0.5
+phase: production
+review: auto
+overrides:
+  disable: []
+  paths: {}
+exclude_paths: []

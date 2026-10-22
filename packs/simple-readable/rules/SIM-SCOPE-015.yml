@@ -1,0 +1,28 @@
+id: sim-scope-015-ts-var
+language: TypeScript
+severity: warning
+message: var で変数を宣言しています
+note: 再代入しないなら const、するなら let を使ってください。var は有効範囲が関数全体に広がります。
+metadata: { principle: SIM-SCOPE-015 }
+rule:
+  kind: variable_declaration
+---
+id: sim-scope-015-py-shadow-builtin
+language: Python
+severity: warning
+message: 組み込みの名前（list / id / type など）を変数名に使っています
+note: 組み込み関数が隠れ、読む人も混乱します。items / user_id のように中身が分かる名前にしてください。
+metadata: { principle: SIM-SCOPE-015 }
+utils:
+  builtin-name:
+    regex: '^(list|dict|set|str|int|float|bool|id|type|input|max|min|sum|len|map|filter|format|object|bytes|hash|iter|next|range|open|all|any|vars|dir|sorted|zip)$'
+rule:
+  any:
+    - kind: assignment
+      has: { field: left, kind: identifier, matches: builtin-name }
+    - kind: identifier
+      matches: builtin-name
+      inside: { kind: parameters }
+    - kind: identifier
+      matches: builtin-name
+      inside: { kind: default_parameter, field: name }

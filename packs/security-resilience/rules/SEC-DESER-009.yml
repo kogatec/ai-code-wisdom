@@ -1,0 +1,40 @@
+id: sec-deser-009-py-pickle
+language: Python
+severity: error
+message: pickle などで、任意のコードを実行しうる形式を読み込んでいます
+note: 外から来るデータは JSON などのデータ専用の形式で読み込んでください。
+metadata: { principle: SEC-DESER-009 }
+rule:
+  kind: call
+  has: { field: function, regex: '^(pickle|cPickle|_pickle|dill|marshal|jsonpickle)\.(load|loads|Unpickler|decode)$|^shelve\.open$' }
+---
+id: sec-deser-009-py-yaml-load
+language: Python
+severity: error
+message: YAML を安全でないローダーで読み込んでいます
+note: yaml.safe_load を使うか、Loader=yaml.SafeLoader を指定してください。
+metadata: { principle: SEC-DESER-009 }
+rule:
+  kind: call
+  all:
+    - has: { field: function, regex: '^yaml\.(load|load_all|unsafe_load|unsafe_load_all)$' }
+    - not:
+        has:
+          field: arguments
+          has: { kind: keyword_argument, regex: '^Loader\s*=\s*(yaml\.)?C?SafeLoader$' }
+---
+id: sec-deser-009-ts-unsafe-lib
+language: TypeScript
+severity: error
+message: 関数まで復元する（コードを実行しうる）シリアライズライブラリを使っています
+note: 外から来るデータは JSON.parse で読み、スキーマで検証してください。
+metadata: { principle: SEC-DESER-009 }
+rule:
+  kind: string
+  regex: '^[''"](node-serialize|serialize-to-js|funcster)[''"]$'
+  inside:
+    stopBy: end
+    any:
+      - kind: import_statement
+      - kind: call_expression
+        has: { field: function, regex: '^require$' }

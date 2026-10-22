@@ -1,0 +1,22 @@
+id: MNT-STATE-013
+version: 0.1.0
+title: 共有される書き換え可能な状態を避ける
+summary: グローバル変数・モジュールの可変な状態・変更できる既定値を使わず、状態は引数かオブジェクトで受け渡す
+level: default
+styles: { maintainable: 1.0, simple_readable: 0.6 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when: []
+rationale: >
+  どこからでも書き換えられる状態は、値がいつ・どこで変わったかを追えず、テストどうしも干渉する。
+  Python の変更できる既定値は、呼び出しのたびに共有されるため、典型的な不具合の原因になる。
+checks:
+  static: [mnt-state-013-py-mutable-default, mnt-state-013-py-global, mnt-state-013-ts-module-let]
+  review: シングルトンやモジュールのキャッシュに、リクエストごとの状態を入れていないか
+  tests: 同じ関数を続けて呼んでも、前の呼び出しの影響を受けないことを確かめる
+example:
+  bad: "def add(item, items=[]): items.append(item)"
+  good: "def add(item, items=None): items = [] if items is None else items"
+tensions: []
+evidence: { tools: [pylint:W0102, pylint:W0603], repos: [] }
+confidence: null
+validation: 未評価

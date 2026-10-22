@@ -1,0 +1,35 @@
+id: res-retry-012-ts-unbounded-retry
+language: TypeScript
+severity: warning
+message: 回数の上限がないリトライに見えます
+note: 最大回数を決め、超えたらエラーを投げてください。待ち時間は指数的に伸ばし、ランダムな揺らぎ（ジッター）を加えてください。
+metadata: { principle: RES-RETRY-012 }
+rule:
+  kind: while_statement
+  all:
+    - has: { field: condition, regex: '^\(\s*true\s*\)$' }
+    - has: { kind: try_statement, stopBy: end }
+    - has:
+        kind: call_expression
+        stopBy: end
+        has: { field: function, regex: '(^|\.)(sleep|delay|wait|setTimeout)$' }
+    - not: { has: { kind: throw_statement, stopBy: end } }
+    - not: { has: { kind: break_statement, stopBy: end } }
+---
+id: res-retry-012-py-unbounded-retry
+language: Python
+severity: warning
+message: 回数の上限がないリトライに見えます
+note: 最大回数を決め、超えたら raise してください。待ち時間は指数的に伸ばし、ランダムな揺らぎ（ジッター）を加えてください（tenacity なども使えます）。
+metadata: { principle: RES-RETRY-012 }
+rule:
+  kind: while_statement
+  all:
+    - has: { field: condition, regex: '^True$' }
+    - has: { kind: try_statement, stopBy: end }
+    - has:
+        kind: call
+        stopBy: end
+        has: { field: function, regex: '(^|\.)sleep$' }
+    - not: { has: { kind: raise_statement, stopBy: end } }
+    - not: { has: { kind: break_statement, stopBy: end } }

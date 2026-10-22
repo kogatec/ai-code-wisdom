@@ -1,0 +1,28 @@
+id: mnt-log-011-ts-console
+language: TypeScript
+severity: info
+message: console で記録しています
+note: レベル・時刻・相関 ID などが付く構造化ロガー（pino など）を使ってください。CLI の出力なら、このままで構いません。
+metadata: { principle: MNT-LOG-011 }
+rule:
+  kind: call_expression
+  has: { field: function, regex: '^console\.(log|debug|info|trace|dir|table)$' }
+---
+id: mnt-log-011-py-print
+language: Python
+severity: info
+message: print で記録しています
+note: logging（structlog など）を使ってください。CLI の出力なら、このままで構いません。
+metadata: { principle: MNT-LOG-011 }
+rule:
+  pattern: print($$$)
+  not:
+    any:
+      - inside:
+          stopBy: end
+          kind: if_statement
+          has: { field: condition, regex: '__name__' }
+      - inside:
+          stopBy: end
+          kind: function_definition
+          has: { field: name, regex: '^main$' }

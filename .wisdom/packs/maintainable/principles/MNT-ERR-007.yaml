@@ -1,0 +1,22 @@
+id: MNT-ERR-007
+version: 0.1.0
+title: エラーは型で区別し、メッセージの文字列で判別しない
+summary: エラーは種類ごとのクラスかコードで投げ、受け取る側も型やコードで判別する
+level: default
+styles: { maintainable: 1.0, security_resilience: 0.5 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when: []
+rationale: >
+  メッセージで判別すると、文言を直しただけでエラー処理が壊れる。
+  型やコードで区別すれば、どんなエラーがあり得るかも読み取れる。
+checks:
+  static: [mnt-err-007-ts-throw-literal, mnt-err-007-ts-message-compare, mnt-err-007-py-str-compare, mnt-err-007-py-generic-exception]
+  review: 呼び出し側が処理を分ける必要のあるエラーに、専用の型かコードがあるか
+  tests: エラーの種類ごとに、呼び出し側が正しく処理を分けることを確かめる
+example:
+  bad: "if (e.message.includes('timeout')) retry()"
+  good: "if (e instanceof TimeoutError) retry()"
+tensions: []
+evidence: { tools: [eslint:no-throw-literal, pylint:W0719], repos: [] }
+confidence: null
+validation: 未評価

@@ -1,0 +1,23 @@
+id: mnt-type-006-ts-any
+language: TypeScript
+severity: warning
+message: any を使っています
+note: 型が分からない値は unknown で受け、スキーマや型ガードで絞り込んでください。any は型の検査をその先まで無効にします。
+metadata: { principle: MNT-TYPE-006 }
+rule:
+  kind: predefined_type
+  regex: '^any$'
+---
+id: mnt-type-006-py-public-no-return-type
+language: Python
+severity: info
+message: 公開関数に戻り値の型注釈がありません
+note: '-> の型注釈を書いてください。呼び出し側が戻り値の形を、実装を読まずに知れます。'
+metadata: { principle: MNT-TYPE-006 }
+rule:
+  kind: function_definition
+  all:
+    - has: { field: name, regex: '^[A-Za-z]' }
+    - not: { has: { field: name, regex: '^test_' } }
+    - not: { has: { field: return_type, regex: '.' } }
+    - not: { inside: { kind: function_definition, stopBy: end } }

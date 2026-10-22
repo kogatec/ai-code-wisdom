@@ -1,0 +1,33 @@
+id: sec-path-004-ts-user-path
+language: TypeScript
+severity: error
+message: 外部入力をそのままファイルのパスに使っています
+note: path.resolve で絶対パスにしたあと、基準ディレクトリの内側か（startsWith(base + path.sep)）を確かめてから使ってください。Express の sendFile なら root オプションを使えます。
+metadata: { principle: SEC-PATH-004 }
+rule:
+  kind: call_expression
+  all:
+    - has:
+        field: function
+        regex: '^((fs|fsp|fs\.promises)\.)?(readFile|readFileSync|writeFile|writeFileSync|appendFile|appendFileSync|createReadStream|createWriteStream|unlink|unlinkSync|rm|rmSync|readdir|readdirSync|open|openSync)$|\.(sendFile|download)$'
+    - has:
+        field: arguments
+        has: { kind: member_expression, stopBy: end, regex: '^(req|request|ctx\.request)\.(params|query|body)\b' }
+    - not:
+        has:
+          field: arguments
+          has: { kind: pair, regex: '^root\s*:', stopBy: end }
+---
+id: sec-path-004-py-user-path
+language: Python
+severity: error
+message: 外部入力をそのままファイルのパスに使っています
+note: Path(base, name).resolve() が base.resolve() の内側か（is_relative_to）を確かめてから使ってください。Flask なら send_from_directory を使えます。
+metadata: { principle: SEC-PATH-004 }
+rule:
+  kind: call
+  all:
+    - has: { field: function, regex: '^(open|io\.open|send_file|os\.remove|os\.unlink|shutil\.rmtree|Path|pathlib\.Path)$' }
+    - has:
+        field: arguments
+        has: { kind: attribute, stopBy: end, regex: '^request\.(args|form|json|values|files|view_args|get_json)$' }

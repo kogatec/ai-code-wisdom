@@ -1,0 +1,38 @@
+id: sim-std-014-ts-index-loop
+language: TypeScript
+severity: info
+message: 添字で配列を回すループです
+note: for...of か、map / filter / reduce を使ってください。添字が必要なら arr.entries() を使えます。
+metadata: { principle: SIM-STD-014 }
+rule:
+  pattern: for (let $I = 0; $I < $A.length; $I++) { $$$ }
+---
+id: sim-std-014-ts-bool-compare
+language: TypeScript
+severity: info
+message: 真偽値を true / false と比べています
+note: if (isReady) や if (!isReady) のように、そのまま使ってください。
+metadata: { principle: SIM-STD-014 }
+rule:
+  kind: binary_expression
+  regex: '[!=]==?\s*(true|false)$|^(true|false)\s*[!=]=='
+---
+id: sim-std-014-py-range-len
+language: Python
+severity: info
+message: range(len(x)) で添字を回しています
+note: for item in x か、添字も必要なら for i, item in enumerate(x) を使ってください。
+metadata: { principle: SIM-STD-014 }
+rule:
+  kind: for_statement
+  has: { field: right, regex: '^range\(len\([^()]*\)\)$' }
+---
+id: sim-std-014-py-none-bool-compare
+language: Python
+severity: info
+message: None / True / False を == / != で比べています
+note: None は is None / is not None で、真偽値はそのまま（if flag:）で判定してください。
+metadata: { principle: SIM-STD-014 }
+rule:
+  kind: comparison_operator
+  regex: '(==|!=)\s*(None|True|False)$'

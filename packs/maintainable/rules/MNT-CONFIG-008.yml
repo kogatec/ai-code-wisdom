@@ -1,0 +1,34 @@
+id: mnt-config-008-ts-hardcoded-endpoint
+language: TypeScript
+severity: info
+message: 接続先の URL / IP アドレスをコードに直接書いています
+note: 環境（開発・検証・本番）ごとに変わる値は、設定（環境変数・設定ファイル）から読み込んでください。
+metadata: { principle: MNT-CONFIG-008 }
+rule:
+  kind: string
+  any:
+    - regex: '^[''"]https?://[^''"\s]+[''"]$'
+    - regex: '^[''"]\d{1,3}(\.\d{1,3}){3}(:\d+)?[''"]$'
+  not:
+    any:
+      - regex: 'localhost|127\.0\.0\.1|0\.0\.0\.0|example\.(com|org|net)|w3\.org|json-schema\.org|schema\.org'
+      - inside:
+          stopBy: end
+          any:
+            - kind: import_statement
+            - kind: call_expression
+              has: { field: function, regex: '^require$' }
+---
+id: mnt-config-008-py-hardcoded-endpoint
+language: Python
+severity: info
+message: 接続先の URL / IP アドレスをコードに直接書いています
+note: 環境（開発・検証・本番）ごとに変わる値は、設定（環境変数・設定ファイル）から読み込んでください。
+metadata: { principle: MNT-CONFIG-008 }
+rule:
+  kind: string
+  any:
+    - regex: '^[rbuRBU]?[''"]https?://[^''"\s]+[''"]$'
+    - regex: '^[rbuRBU]?[''"]\d{1,3}(\.\d{1,3}){3}(:\d+)?[''"]$'
+  not:
+    regex: 'localhost|127\.0\.0\.1|0\.0\.0\.0|example\.(com|org|net)|w3\.org|json-schema\.org|schema\.org'

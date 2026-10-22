@@ -1,0 +1,24 @@
+id: SEC-INJ-002
+version: 0.1.0
+title: SQL は文字列で組み立てず、値はパラメータで渡す
+summary: SQL に値を埋め込まず、プレースホルダかクエリビルダーで渡す
+level: mandatory
+styles: { security_resilience: 1.0 }
+applies_when:
+  languages: [typescript, python]
+  layers: [data_access]
+not_when: []
+rationale: >
+  値を文字列として埋め込むと、値の中身が SQL として解釈されうる。
+  パラメータで渡せば、ドライバが値とコードを分けて扱う。
+checks:
+  static: [sec-inj-002-ts-sql-concat, sec-inj-002-ts-sql-template, sec-inj-002-py-sql-fstring, sec-inj-002-py-sql-format]
+  review: 動的に変わる部分（並び替えの列名など）は、許可リストから選んでいるか
+  tests: "' OR '1'='1 などを入力しても、余分な行が返らないことを確かめる"
+example:
+  bad: "db.query(`SELECT * FROM users WHERE id = ${id}`)"
+  good: "db.query('SELECT * FROM users WHERE id = $1', [id])"
+tensions: []
+evidence: { standards: [CWE-89], repos: [] }
+confidence: null
+validation: 未評価

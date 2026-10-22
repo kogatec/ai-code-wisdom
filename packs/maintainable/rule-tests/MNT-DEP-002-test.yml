@@ -1,0 +1,16 @@
+id: mnt-dep-002-ts-deep-relative-import
+valid:
+  - import { User } from "../../domain/user";
+  - import { User } from "@/domain/user";
+invalid:
+  - import { db } from "../../../infra/db";
+  - const db = require("../../../infra/db");
+  - export { db } from "../../../../infra/db";
+---
+id: mnt-dep-002-py-deep-relative-import
+valid:
+  - from ..domain import user
+  - from app.infra import db
+invalid:
+  - from ...infra import db
+  - from ....infra.db import session

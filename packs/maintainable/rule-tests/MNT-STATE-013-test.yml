@@ -1,0 +1,44 @@
+id: mnt-state-013-py-mutable-default
+valid:
+  - |
+    def add(item, items=None):
+        items = items or []
+        items.append(item)
+        return items
+  - |
+    def greet(name="world"):
+        return name
+invalid:
+  - |
+    def add(item, items=[]):
+        items.append(item)
+        return items
+  - |
+    def merge(a, extra: dict = {}):
+        return {**a, **extra}
+  - |
+    def tag(x, seen=set()):
+        seen.add(x)
+---
+id: mnt-state-013-py-global
+valid:
+  - |
+    def bump(counter):
+        return counter + 1
+invalid:
+  - |
+    def bump():
+        global COUNTER
+        COUNTER += 1
+---
+id: mnt-state-013-ts-module-let
+valid:
+  - const cache = new Map();
+  - |
+    function f() {
+      let count = 0;
+      return count;
+    }
+invalid:
+  - let currentUser = null;
+  - export let config = {};

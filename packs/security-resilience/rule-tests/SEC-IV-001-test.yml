@@ -1,0 +1,21 @@
+id: sec-iv-001-ts-raw-request
+valid:
+  - const input = CreateUser.parse(req.body);
+  - const r = schema.safeParse(req.query);
+  - const input = await Schema.parseAsync(JSON.parse(req.body));
+  - const body = res.body;
+invalid:
+  - const { name } = req.body;
+  - db.insert(req.body);
+  - const id = req.params.id;
+  - const data = JSON.parse(req.body);
+---
+id: sec-iv-001-py-raw-request
+valid:
+  - user = CreateUser.model_validate(request.get_json())
+  - args = QuerySchema().load(request.args)
+invalid:
+  - name = request.json["name"]
+  - q = request.args.get("q")
+  - data = request.get_json()
+  - data = json.loads(request.data)

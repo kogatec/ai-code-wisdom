@@ -1,0 +1,55 @@
+id: sim-nest-002-ts-deep-nesting
+language: TypeScript
+severity: warning
+message: 制御構文（if / for / while / switch）の入れ子が4段以上あります
+note: 条件を満たさない場合を先に return / continue で抜ける（早期リターン）か、内側を関数に分けてください。
+metadata: { principle: SIM-NEST-002 }
+utils:
+  control:
+    any:
+      - kind: if_statement
+        not: { inside: { kind: else_clause } }
+      - kind: for_statement
+      - kind: for_in_statement
+      - kind: while_statement
+      - kind: do_statement
+      - kind: switch_statement
+rule:
+  matches: control
+  has:
+    stopBy: end
+    matches: control
+    has:
+      stopBy: end
+      matches: control
+      has:
+        stopBy: end
+        matches: control
+  not:
+    inside: { stopBy: end, matches: control }
+---
+id: sim-nest-002-py-deep-nesting
+language: Python
+severity: warning
+message: 制御構文（if / for / while）の入れ子が4段以上あります
+note: 条件を満たさない場合を先に return / continue で抜ける（早期リターン）か、内側を関数に分けてください。
+metadata: { principle: SIM-NEST-002 }
+utils:
+  control:
+    any:
+      - kind: if_statement
+      - kind: for_statement
+      - kind: while_statement
+rule:
+  matches: control
+  has:
+    stopBy: end
+    matches: control
+    has:
+      stopBy: end
+      matches: control
+      has:
+        stopBy: end
+        matches: control
+  not:
+    inside: { stopBy: end, matches: control }

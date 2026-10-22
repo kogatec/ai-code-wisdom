@@ -1,0 +1,22 @@
+id: SIM-COND-006
+version: 0.1.0
+title: 複雑な条件式には名前を付ける
+summary: 4つ以上の条件をつなぐ式は、意味のまとまりごとに名前を付けた変数か関数にする
+level: advisory
+styles: { simple_readable: 1.0 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when: []
+rationale: >
+  長い条件式は、何を判定しているのかを読み解く必要がある。
+  名前を付ければ、条件の意図がそのまま読める。
+checks:
+  static: [sim-cond-006-ts-complex-condition, sim-cond-006-py-complex-condition]
+  review: 同じ条件の組み合わせが複数の場所に書かれていないか
+  tests: 名前を付けた条件（関数にした場合）を、境界の値で単独でテストする
+example:
+  bad: "if (user && user.active && cart.items.length > 0 && !user.blocked)"
+  good: "const canCheckout = isActiveUser(user) && cart.items.length > 0; if (canCheckout)"
+tensions: []
+evidence: { tools: [eslint:complexity, pylint:R0916], repos: [] }
+confidence: null
+validation: 未評価

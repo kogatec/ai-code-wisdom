@@ -1,0 +1,96 @@
+id: sec-inj-003-ts-eval
+language: TypeScript
+severity: error
+message: eval / new Function で文字列をコードとして実行しています
+note: データは JSON.parse で読み、処理の切り替えは対応表（オブジェクトや Map）で行ってください。
+metadata: { principle: SEC-INJ-003 }
+rule:
+  any:
+    - pattern: eval($$$)
+    - pattern: new Function($$$)
+---
+id: sec-inj-003-ts-shell-string
+language: TypeScript
+severity: error
+message: シェルに渡すコマンドを、文字列の埋め込み・連結で組み立てています
+note: execFile / spawn に「コマンド」と「引数の配列」を分けて渡してください（シェルを通さない）。
+metadata: { principle: SEC-INJ-003 }
+rule:
+  kind: call_expression
+  all:
+    - has: { field: function, regex: '(^|\.)(exec|execSync)$' }
+    - has:
+        field: arguments
+        has:
+          nthChild: 1
+          any:
+            - all:
+                - kind: template_string
+                - has: { kind: template_substitution }
+            - pattern: $A + $B
+---
+id: sec-inj-003-ts-shell-true
+language: TypeScript
+severity: warning
+message: 'spawn / execFile で shell: true を指定しています'
+note: 'shell: true にすると引数がシェルで解釈されます。外部の値が混ざるなら外してください。'
+metadata: { principle: SEC-INJ-003 }
+rule:
+  kind: pair
+  regex: '^shell\s*:\s*true$'
+  inside:
+    kind: call_expression
+    stopBy: end
+    has: { field: function, regex: '(^|\.)(spawn|spawnSync|execFile|execFileSync)$' }
+---
+id: sec-inj-003-py-shell-true
+language: Python
+severity: error
+message: shell=True のコマンドに、組み立てた文字列を渡しています
+note: subprocess.run(["cmd", arg]) のように引数をリストで渡し、shell=True を外してください。
+metadata: { principle: SEC-INJ-003 }
+rule:
+  kind: call
+  all:
+    - has: { field: function, regex: '^subprocess\.(run|call|check_call|check_output|Popen)$' }
+    - has:
+        field: arguments
+        has: { kind: keyword_argument, regex: '^shell\s*=\s*True$' }
+    - has:
+        field: arguments
+        has:
+          nthChild: 1
+          not:
+            all:
+              - kind: string
+              - not: { has: { kind: interpolation, stopBy: end } }
+---
+id: sec-inj-003-py-os-system
+language: Python
+severity: error
+message: os.system / os.popen に組み立てた文字列を渡しています
+note: subprocess.run(["cmd", arg]) のように引数をリストで渡してください。
+metadata: { principle: SEC-INJ-003 }
+rule:
+  kind: call
+  all:
+    - has: { field: function, regex: '^os\.(system|popen)$' }
+    - has:
+        field: arguments
+        has:
+          nthChild: 1
+          not:
+            all:
+              - kind: string
+              - not: { has: { kind: interpolation, stopBy: end } }
+---
+id: sec-inj-003-py-eval
+language: Python
+severity: error
+message: eval / exec で文字列をコードとして実行しています
+note: リテラルの読み込みは ast.literal_eval、データは json.loads、処理の切り替えは辞書で行ってください。
+metadata: { principle: SEC-INJ-003 }
+rule:
+  any:
+    - pattern: eval($$$)
+    - pattern: exec($$$)

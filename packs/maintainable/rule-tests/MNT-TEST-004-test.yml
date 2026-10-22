@@ -1,0 +1,42 @@
+id: mnt-test-004-ts-focused-test
+valid:
+  - it("works", () => { expect(1).toBe(1); });
+invalid:
+  - it.only("works", () => { expect(1).toBe(1); });
+  - describe.only("cart", () => {});
+  - fit("works", () => {});
+---
+id: mnt-test-004-ts-skipped-test
+valid:
+  - it("works", () => {});
+invalid:
+  - it.skip("works", () => {});
+  - xit("works", () => {});
+---
+id: mnt-test-004-py-skip-without-reason
+valid:
+  - |
+    @pytest.mark.skip(reason="外部 API の仕様変更待ち #123")
+    def test_sync():
+        assert True
+  - |
+    @pytest.mark.skipif(sys.platform == "win32", reason="POSIX のみ")
+    def test_sync():
+        assert True
+invalid:
+  - |
+    @pytest.mark.skip
+    def test_sync():
+        assert True
+---
+id: mnt-test-004-py-sleep-in-test
+valid:
+  - |
+    def wait_until_ready():
+        time.sleep(1)
+invalid:
+  - |
+    def test_eventually_ready():
+        start()
+        time.sleep(2)
+        assert ready()

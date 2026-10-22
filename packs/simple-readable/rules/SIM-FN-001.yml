@@ -1,0 +1,24 @@
+id: sim-fn-001-ts-long-function
+language: TypeScript
+severity: warning
+message: 関数が60行を超えています
+note: 1つの関数が1つのことだけをするように、意味のまとまりごとに名前を付けた関数へ分けてください。
+metadata: { principle: SIM-FN-001 }
+rule:
+  any:
+    - kind: function_declaration
+    - kind: generator_function_declaration
+    - kind: method_definition
+    - kind: arrow_function
+    - kind: function_expression
+  regex: '^(?:[^\n]*\n){60,}'
+---
+id: sim-fn-001-py-long-function
+language: Python
+severity: warning
+message: 関数が60行を超えています
+note: 1つの関数が1つのことだけをするように、意味のまとまりごとに名前を付けた関数へ分けてください。
+metadata: { principle: SIM-FN-001 }
+rule:
+  kind: function_definition
+  regex: '^(?:[^\n]*\n){60,}'

@@ -1,0 +1,22 @@
+id: MNT-SIDE-012
+version: 0.1.0
+title: 外部とのやり取りを端に寄せ、中心の処理を純粋に保つ
+summary: 通信・ファイル・DB などの外部とのやり取りは端に寄せ、業務の判断は入力から結果を返す関数にする
+level: default
+styles: { maintainable: 1.0, testing: 0.8 }
+applies_when: { languages: [typescript, python], layers: [service, domain] }
+not_when: []
+rationale: >
+  外部とのやり取りが混ざった処理は、テストのたびにその準備が必要になり、再利用もしにくい。
+  判断の部分を純粋な関数にすれば、速く確実にテストでき、組み替えも容易になる。
+checks:
+  static: [mnt-side-012-ts-import-time-io, mnt-side-012-py-import-time-io]
+  review: 業務の判断（計算・条件分岐）と、DB や API の呼び出しが同じ関数に混ざっていないか
+  tests: 業務の判断の部分を、外部を使わずに単体でテストする
+example:
+  bad: "async function applyDiscount(id) { const o = await db.get(id); if (o.total > 10000) { await db.update(...) } }"
+  good: "function discountFor(order): Discount {...}  // 純粋。呼び出し側で読み書きする"
+tensions: [{ axis: abstraction, direction: more }]
+evidence: { tools: [], repos: [] }
+confidence: null
+validation: 未評価

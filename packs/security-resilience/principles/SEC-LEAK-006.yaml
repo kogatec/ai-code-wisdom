@@ -1,0 +1,24 @@
+id: SEC-LEAK-006
+version: 0.1.0
+title: 秘密情報と内部の詳細を、ログや応答に出さない
+summary: ログに秘密情報を出さず、応答にスタックトレースを含めない
+level: mandatory
+styles: { security_resilience: 1.0 }
+applies_when:
+  languages: [typescript, python]
+  layers: [any]
+not_when: []
+rationale: >
+  ログは多くの人とサービスが読むため、秘密情報が広がりやすい。
+  スタックトレースは、攻撃者に内部の構造を教えてしまう。
+checks:
+  static: [sec-leak-006-ts-log-secret, sec-leak-006-ts-stack-to-client, sec-leak-006-py-log-secret, sec-leak-006-py-traceback-response]
+  review: リクエスト全体やユーザーオブジェクトを丸ごとログに出していないか。エラー応答が一般的なメッセージと問い合わせ ID だけになっているか
+  tests: 例外を起こしたときの応答に、スタックトレースやファイルパスが含まれないことを確かめる
+example:
+  bad: "res.status(500).json({ error: err.stack })"
+  good: "logger.error({ err, requestId }); res.status(500).json({ error: 'internal error', requestId })"
+tensions: []
+evidence: { standards: [CWE-532, CWE-209], repos: [] }
+confidence: null
+validation: 未評価

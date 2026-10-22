@@ -1,0 +1,55 @@
+id: sec-inj-002-ts-sql-concat
+language: TypeScript
+severity: error
+message: SQL を文字列の連結で組み立てています
+note: プレースホルダ（$1 や ?）に値を渡すか、クエリビルダー・タグ付きテンプレート（sql`...`）を使ってください。
+metadata: { principle: SEC-INJ-002 }
+rule:
+  kind: binary_expression
+  pattern: $A + $B
+  has:
+    kind: string
+    stopBy: end
+    regex: '(?i)^[''"]\s*(select\s[\s\S]*\sfrom\s|insert\s+into\s|update\s+\S+\s+set\s|delete\s+from\s)'
+  not:
+    inside: { kind: binary_expression }
+---
+id: sec-inj-002-ts-sql-template
+language: TypeScript
+severity: error
+message: SQL をテンプレート文字列への埋め込みで組み立てています
+note: プレースホルダに値を渡すか、値を自動でエスケープするタグ付きテンプレート（sql`...`、Prisma の $queryRaw`...`）を使ってください。
+metadata: { principle: SEC-INJ-002 }
+rule:
+  kind: template_string
+  regex: '(?i)^`\s*(select\s[\s\S]*\sfrom\s|insert\s+into\s|update\s+\S+\s+set\s|delete\s+from\s)'
+  has: { kind: template_substitution }
+  not:
+    inside: { kind: call_expression }
+---
+id: sec-inj-002-py-sql-fstring
+language: Python
+severity: error
+message: SQL を f-string で組み立てています
+note: cursor.execute("... WHERE id = %s", (value,)) のようにパラメータで渡してください。
+metadata: { principle: SEC-INJ-002 }
+rule:
+  kind: string
+  regex: '(?i)^[a-z]*[''"]{1,3}\s*(select\s[\s\S]*\sfrom\s|insert\s+into\s|update\s+\S+\s+set\s|delete\s+from\s)'
+  has: { kind: interpolation, stopBy: end }
+---
+id: sec-inj-002-py-sql-format
+language: Python
+severity: error
+message: SQL を %・+・format で組み立てています
+note: cursor.execute("... WHERE id = %s", (value,)) のようにパラメータで渡してください。
+metadata: { principle: SEC-INJ-002 }
+rule:
+  any:
+    - pattern: $S % $V
+    - pattern: $S + $V
+    - pattern: $S.format($$$)
+constraints:
+  S:
+    kind: string
+    regex: '(?i)^[a-z]*[''"]{1,3}\s*(select\s[\s\S]*\sfrom\s|insert\s+into\s|update\s+\S+\s+set\s|delete\s+from\s)'

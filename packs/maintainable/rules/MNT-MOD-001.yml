@@ -1,0 +1,19 @@
+id: mnt-mod-001-ts-long-file
+language: TypeScript
+severity: warning
+message: ファイルが400行を超えています
+note: 変わる理由ごとにモジュールを分けてください。1つのファイルに複数の責務があると、変更の影響範囲が読めなくなります。
+metadata: { principle: MNT-MOD-001 }
+rule:
+  kind: program
+  regex: '^(?:[^\n]*\n){400,}'
+---
+id: mnt-mod-001-py-long-file
+language: Python
+severity: warning
+message: ファイルが400行を超えています
+note: 変わる理由ごとにモジュールを分けてください。1つのファイルに複数の責務があると、変更の影響範囲が読めなくなります。
+metadata: { principle: MNT-MOD-001 }
+rule:
+  kind: module
+  regex: '^(?:[^\n]*\n){400,}'

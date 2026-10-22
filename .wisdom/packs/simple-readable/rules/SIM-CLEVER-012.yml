@@ -1,0 +1,48 @@
+id: sim-clever-012-ts-nested-ternary
+language: TypeScript
+severity: warning
+message: 三項演算子が入れ子になっています
+note: if 文か、早期リターンする小さな関数に書き直してください。
+metadata: { principle: SIM-CLEVER-012 }
+rule:
+  kind: ternary_expression
+  has: { kind: ternary_expression, stopBy: end }
+  not:
+    inside: { kind: ternary_expression, stopBy: end }
+---
+id: sim-clever-012-ts-bit-trick
+language: TypeScript
+severity: info
+message: ~~x のようなビット演算の小技で数値を変換しています
+note: Math.trunc(x) など、意図が名前で分かる関数を使ってください。
+metadata: { principle: SIM-CLEVER-012 }
+rule:
+  pattern: ~~$X
+---
+id: sim-clever-012-py-nested-conditional
+language: Python
+severity: warning
+message: 条件式（a if c else b）が入れ子になっています
+note: if 文か、早期リターンする小さな関数に書き直してください。
+metadata: { principle: SIM-CLEVER-012 }
+rule:
+  kind: conditional_expression
+  has: { kind: conditional_expression, stopBy: end }
+  not:
+    inside: { kind: conditional_expression, stopBy: end }
+---
+id: sim-clever-012-py-multi-for-comprehension
+language: Python
+severity: info
+message: 内包表記の中で for を2回以上使っています
+note: 普通の for 文に書き直すか、内側を関数に分けてください。
+metadata: { principle: SIM-CLEVER-012 }
+rule:
+  any:
+    - kind: list_comprehension
+    - kind: set_comprehension
+    - kind: dictionary_comprehension
+    - kind: generator_expression
+  has:
+    kind: for_in_clause
+    precedes: { kind: for_in_clause, stopBy: end }

@@ -1,0 +1,46 @@
+id: sim-else-008-ts-else-after-return
+valid:
+  - |
+    function f(x) {
+      if (!x) { return null; }
+      return parse(x);
+    }
+  - |
+    function g(x) {
+      if (x < 0) { return "neg"; }
+      else if (x === 0) { return "zero"; }
+      else { return "pos"; }
+    }
+  - if (x) { log(x); } else { warn(); }
+invalid:
+  - |
+    function f(x) {
+      if (!x) { return null; } else { return parse(x); }
+    }
+  - |
+    function h(x) {
+      if (!x) throw new Error("x"); else run(x);
+    }
+---
+id: sim-else-008-py-else-after-return
+valid:
+  - |
+    def f(x):
+        if not x:
+            return None
+        return parse(x)
+  - |
+    def g(x):
+        if x < 0:
+            return "neg"
+        elif x == 0:
+            return "zero"
+        else:
+            return "pos"
+invalid:
+  - |
+    def f(x):
+        if not x:
+            return None
+        else:
+            return parse(x)

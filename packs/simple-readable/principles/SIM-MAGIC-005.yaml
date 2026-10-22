@@ -1,0 +1,24 @@
+id: SIM-MAGIC-005
+version: 0.1.0
+title: 意味のある数値には名前を付ける
+summary: 計算・比較・引数に直接書く数値には、意味が分かる名前の定数を付ける
+level: advisory
+styles: { simple_readable: 1.0, maintainable: 0.7 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when:
+  - 0, 1, 2, 10, 100 など、意味が自明な数値
+  - オブジェクトのキーや引数名で意味が分かる値（timeout=5 など）
+rationale: >
+  30000 が何を意味するかは、書いた人にしか分からない。
+  名前を付ければ意味が伝わり、同じ値を変えるときも1か所で済む。
+checks:
+  static: [sim-magic-005-ts-magic-number, sim-magic-005-py-magic-number]
+  review: 同じ意味の数値が複数の場所に書かれていないか
+  tests: なし
+example:
+  bad: "setTimeout(refresh, 30000)"
+  good: "const REFRESH_INTERVAL_MS = 30_000; setTimeout(refresh, REFRESH_INTERVAL_MS)"
+tensions: []
+evidence: { tools: [eslint:no-magic-numbers, pylint:R2004], repos: [] }
+confidence: null
+validation: 未評価

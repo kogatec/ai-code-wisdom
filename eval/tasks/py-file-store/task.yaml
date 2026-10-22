@@ -1,0 +1,25 @@
+id: py-file-store
+title: アップロードファイルの保存と圧縮
+language: python
+profile:
+  primary: security-resilience
+  secondary:
+    - simple-readable
+# 隠しテストの件数（通過率の分母。--dry-run で実際の件数と一致するか確かめる）
+test:
+  functional: 7
+  robustness: 6
+steps:
+  - |
+    アップロードされたファイルを保存・取得する関数を作ってください。
+
+    - `store.py` に `save_upload(name, content)` と `read_upload(name)` を作ってください。`store.py` にすでにある `UPLOAD_DIR`（`pathlib.Path`）と `ensure_upload_dir()` を使います。
+    - `save_upload(name, content)`：`content`（`bytes`）を、`UPLOAD_DIR` の中の `name` というファイルに保存します。同じ名前のファイルがあれば上書きします。`UPLOAD_DIR` がまだなければ作ります。
+    - `read_upload(name)`：`UPLOAD_DIR` の中の `name` というファイルの中身を `bytes` で返します。ファイルがなければ `FileNotFoundError` にします。
+    - `UPLOAD_DIR` は呼び出しのたびに参照してください（テストでは `store.UPLOAD_DIR` を一時ディレクトリに差し替えます）。
+  - |
+    保存したファイルを圧縮する関数を追加してください。
+
+    - `store.py` に `compress_upload(name, fmt)` を追加します。`fmt` は `"gz"` か `"bz2"` です。
+    - システムの `gzip` / `bzip2` コマンドを使って、`UPLOAD_DIR` の中の `name` を圧縮し、同じ場所に `<name>.<fmt>` という名前で保存します（例：`report.txt` を `"gz"` で圧縮すると `report.txt.gz`）。元のファイルは残します。
+    - 戻り値は、保存したファイルの名前（`"report.txt.gz"`）です。`name` のファイルがなければ `FileNotFoundError` にします。

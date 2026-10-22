@@ -1,0 +1,24 @@
+id: SEC-PATH-004
+version: 0.1.0
+title: 外部から来たパスは、基準ディレクトリの内側に閉じ込める
+summary: 外部入力のパスは resolve 後に基準ディレクトリの内側か確かめてから使う
+level: mandatory
+styles: { security_resilience: 1.0 }
+applies_when:
+  languages: [typescript, python]
+  layers: [api_handler, file_access]
+not_when: []
+rationale: >
+  ../ を含むパスを受け取ると、意図しないファイルを読み書きされる。
+  正規化したうえで基準ディレクトリの内側か確かめれば防げる。
+checks:
+  static: [sec-path-004-ts-user-path, sec-path-004-py-user-path]
+  review: 変数を経由してファイル操作に渡る外部入力も、内側か確かめているか（静的検査は直接渡す場合しか見つけられない）
+  tests: ../../etc/passwd や絶対パス、URL エンコードした ../ を渡すと拒否されることを確かめる
+example:
+  bad: "fs.readFile(path.join(UPLOAD_DIR, req.params.name))"
+  good: "const p = path.resolve(UPLOAD_DIR, name); if (!p.startsWith(UPLOAD_DIR + path.sep)) throw new Forbidden();"
+tensions: []
+evidence: { standards: [CWE-22], repos: [] }
+confidence: null
+validation: 未評価

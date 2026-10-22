@@ -1,0 +1,25 @@
+id: RES-ERR-010
+version: 0.1.0
+title: エラーを握りつぶさない
+summary: 捕まえたエラーは、記録・投げ直し・利用者への通知のどれかをする
+level: default
+styles: { security_resilience: 0.9, maintainable: 0.7 }
+applies_when:
+  languages: [typescript, python]
+  layers: [any]
+not_when:
+  - 無視が正しい場合（理由をコメントに書けば、検査は通る）
+rationale: >
+  握りつぶしたエラーは、データの欠損や不整合として、ずっと後に別の場所で見つかる。
+  そのときには原因をたどれない。
+checks:
+  static: [res-err-010-ts-empty-catch, res-err-010-ts-empty-promise-catch, res-err-010-py-except-pass, res-err-010-py-bare-except]
+  review: catch でエラーを記録だけして処理を続けていないか（続けてよい理由があるか）。広すぎる型で捕まえていないか
+  tests: 依存先がエラーを返したとき、呼び出し元にエラーが伝わる（成功扱いにならない）ことを確かめる
+example:
+  bad: "try { await save(order) } catch (e) {}"
+  good: "try { await save(order) } catch (e) { logger.error({ err: e, orderId }); throw e }"
+tensions: [{ axis: verbosity, direction: more }]
+evidence: { standards: [CWE-390, CWE-396], repos: [] }
+confidence: null
+validation: 未評価

@@ -1,0 +1,16 @@
+id: sec-path-004-ts-user-path
+valid:
+  - 'res.sendFile(req.params.name, { root: PUBLIC_DIR });'
+  - fs.readFile(safePath, cb);
+invalid:
+  - fs.readFile(path.join(UPLOAD_DIR, req.params.name), cb);
+  - res.download(req.query.file);
+  - await readFile(req.body.path);
+---
+id: sec-path-004-py-user-path
+valid:
+  - return send_from_directory(BASE, request.args["f"])
+  - open(safe_path)
+invalid:
+  - open(os.path.join(BASE, request.args["f"]))
+  - return send_file(request.args.get("path"))

@@ -1,0 +1,23 @@
+id: SIM-PARAM-003
+version: 0.1.0
+title: 引数は少なくし、多くなったら名前付きでまとめる
+summary: 引数は4個まで。それを超えたらオブジェクトや dataclass にまとめる
+level: default
+styles: { simple_readable: 1.0, maintainable: 0.5 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when:
+  - DI コンテナが注入するコンストラクタ（TypeScript の constructor は検査しない）
+rationale: >
+  引数が多いと、呼び出し側で順番を取り違えやすく、どの値が何かも読めない。
+  名前付きでまとめれば、呼び出し側を読むだけで意味が分かる。
+checks:
+  static: [sim-param-003-ts-many-params, sim-param-003-py-many-params]
+  review: 同じ組み合わせの引数が複数の関数に渡されていないか（1つの型にまとめる候補）
+  tests: なし
+example:
+  bad: "createUser(name, email, role, team, true)"
+  good: "createUser({ name, email, role, team, active: true })"
+tensions: []
+evidence: { tools: [eslint:max-params, pylint:R0913], repos: [] }
+confidence: null
+validation: 未評価

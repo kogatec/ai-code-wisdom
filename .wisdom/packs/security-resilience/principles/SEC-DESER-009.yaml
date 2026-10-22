@@ -1,0 +1,25 @@
+id: SEC-DESER-009
+version: 0.1.0
+title: 外から来たデータを、コードを実行しうる形式で読み込まない
+summary: 外部データは JSON などで読み、pickle や安全でない YAML ローダーを使わない
+level: mandatory
+styles: { security_resilience: 1.0 }
+applies_when:
+  languages: [typescript, python]
+  layers: [any]
+not_when:
+  - 自分で書き出し、改ざんされない場所にだけ置くデータ（その旨をコメントに書く）
+rationale: >
+  pickle などは、読み込むだけで任意のコードを実行できる。
+  データ専用の形式なら、中身はただの値として扱われる。
+checks:
+  static: [sec-deser-009-py-pickle, sec-deser-009-py-yaml-load, sec-deser-009-ts-unsafe-lib]
+  review: キャッシュやキューなど、外から書き換えられうる場所のデータを、安全でない形式で読んでいないか
+  tests: 不正な形式のデータを読み込むと、明確なエラーになることを確かめる
+example:
+  bad: "obj = pickle.loads(request.data)"
+  good: "obj = Payload.model_validate_json(request.data)"
+tensions: []
+evidence: { standards: [CWE-502], repos: [] }
+confidence: null
+validation: 未評価

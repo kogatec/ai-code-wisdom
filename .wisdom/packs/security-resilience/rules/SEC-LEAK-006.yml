@@ -1,0 +1,80 @@
+id: sec-leak-006-ts-log-secret
+language: TypeScript
+severity: error
+message: 秘密情報らしき値をログに出しています
+note: ログには出さないか、redact / mask で伏せてから出してください。
+metadata: { principle: SEC-LEAK-006 }
+rule:
+  kind: call_expression
+  all:
+    - has: { field: function, regex: '^(console|logger|log|this\.logger|this\.log)\.(log|info|warn|error|debug|trace|fatal)$' }
+    - has:
+        field: arguments
+        has:
+          stopBy: end
+          any:
+            - kind: identifier
+            - kind: property_identifier
+            - kind: shorthand_property_identifier
+          regex: '(?i)^(password|passwd|pwd|secret|client_?secret|api_?key|token|access_?token|refresh_?token|id_?token|authorization|cookie|private_?key|session_?id|credentials?)$'
+          not:
+            any:
+              - inside: { kind: pair, field: key }
+              - inside:
+                  kind: call_expression
+                  stopBy: end
+                  has: { field: function, regex: '(?i)(mask|redact|hash|fingerprint)\w*$' }
+---
+id: sec-leak-006-ts-stack-to-client
+language: TypeScript
+severity: error
+message: スタックトレースをクライアントへの応答に含めています
+note: 応答には一般的なエラーメッセージと問い合わせ用の ID だけを返し、詳細はサーバーのログに残してください。
+metadata: { principle: SEC-LEAK-006 }
+rule:
+  kind: call_expression
+  all:
+    - has: { field: function, regex: '^(res|reply|ctx)\.(status\([^)]*\)\.)?(send|json|write|end|body)$' }
+    - has:
+        field: arguments
+        has: { kind: member_expression, stopBy: end, regex: '\.stack$' }
+---
+id: sec-leak-006-py-log-secret
+language: Python
+severity: error
+message: 秘密情報らしき値をログに出しています
+note: ログには出さないか、redact / mask で伏せてから出してください。
+metadata: { principle: SEC-LEAK-006 }
+rule:
+  kind: call
+  all:
+    - has: { field: function, regex: '^(print|logging\.\w+|logger\.\w+|log\.\w+|self\.logger\.\w+|self\.log\.\w+)$' }
+    - has:
+        field: arguments
+        has:
+          kind: identifier
+          stopBy: end
+          regex: '(?i)^(password|passwd|pwd|secret|client_secret|api_key|apikey|token|access_token|refresh_token|id_token|authorization|cookie|private_key|session_id|credentials?)$'
+          not:
+            any:
+              - inside: { kind: keyword_argument, field: name }
+              - inside:
+                  kind: call
+                  stopBy: end
+                  has: { field: function, regex: '(?i)(mask|redact|hash|fingerprint)\w*$' }
+---
+id: sec-leak-006-py-traceback-response
+language: Python
+severity: error
+message: スタックトレースをクライアントへの応答に含めています
+note: 応答には一般的なエラーメッセージと問い合わせ用の ID だけを返し、詳細はサーバーのログに残してください。
+metadata: { principle: SEC-LEAK-006 }
+rule:
+  kind: call
+  regex: '^traceback\.format_exc\(\)$'
+  inside:
+    stopBy: end
+    any:
+      - kind: return_statement
+      - kind: call
+        has: { field: function, regex: '^(jsonify|Response|JSONResponse|HTTPException|make_response|abort)$' }

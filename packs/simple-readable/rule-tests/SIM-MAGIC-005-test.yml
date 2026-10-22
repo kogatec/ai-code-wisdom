@@ -1,0 +1,26 @@
+id: sim-magic-005-ts-magic-number
+valid:
+  - const SECONDS_PER_DAY = 60 * 60 * 24;
+  - const retries = 3;
+  - 'const opts = { timeout: 5000 };'
+  - if (items.length > 0) { send(); }
+  - const half = total / 2;
+invalid:
+  - setTimeout(refresh, 30000);
+  - const total = price * 1.08;
+  - if (age >= 18) { allow(); }
+---
+id: sim-magic-005-py-magic-number
+valid:
+  - SECONDS_PER_DAY = 60 * 60 * 24
+  - retries = 3
+  - r = requests.get(url, timeout=5)
+  - |
+    if len(items) > 0:
+        send()
+invalid:
+  - time.sleep(30)
+  - total = price * 1.08
+  - |
+    if age >= 18:
+        allow()

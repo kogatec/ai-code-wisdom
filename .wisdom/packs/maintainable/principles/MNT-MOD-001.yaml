@@ -1,0 +1,22 @@
+id: MNT-MOD-001
+version: 0.1.0
+title: モジュールは変わる理由ごとに分ける
+summary: 1つのモジュールには1つの変わる理由だけを置き、400行を超えたら分割を検討する
+level: default
+styles: { maintainable: 1.0, extensibility: 0.7 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when:
+  - 自動生成されたファイル
+rationale: >
+  変わる理由が違うコードが同じファイルにあると、ある変更が無関係な機能を壊しやすい。
+  分けておけば、変更の影響範囲がファイルの境界で読める。
+checks:
+  static: [mnt-mod-001-ts-long-file, mnt-mod-001-py-long-file]
+  review: 1つの変更依頼で、無関係に見える複数のモジュールを同時に直していないか（責務の境界がずれている兆候）
+example:
+  bad: "utils.ts に日付処理・価格計算・API 呼び出しが混在"
+  good: "date.ts / pricing.ts / apiClient.ts に分ける"
+tensions: [{ axis: abstraction, direction: more }]
+evidence: { tools: [eslint:max-lines, pylint:C0302], repos: [] }
+confidence: null
+validation: 未評価

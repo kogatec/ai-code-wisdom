@@ -1,0 +1,21 @@
+id: sim-comment-013-ts-commented-out-code
+language: TypeScript
+severity: info
+message: コメントアウトしたコードが残っています
+note: 古いコードは git の履歴に残っているので、消してください。残す理由があるなら、その理由を文章で書いてください。
+metadata: { principle: SIM-COMMENT-013 }
+rule:
+  kind: comment
+  regex: '^//\s*(?:(?:const|let|var)\s+[\w{}\[\], ]+\s*=|return\b[^;]*;\s*$|import\s.*\sfrom\s+[''"]|(?:if|for|while)\s*\(.*\)\s*\{?\s*$|[\w.$\[\]]+\([^)]*\);\s*$|[\w.$\[\]]+\s*=[^=>].*;\s*$|\}\s*$)'
+---
+id: sim-comment-013-py-commented-out-code
+language: Python
+severity: info
+message: コメントアウトしたコードが残っています
+note: 古いコードは git の履歴に残っているので、消してください。残す理由があるなら、その理由を文章で書いてください。
+metadata: { principle: SIM-COMMENT-013 }
+rule:
+  kind: comment
+  regex: '^#\s*(?:(?:def|class)\s+\w+.*:\s*$|import\s+[\w.]+\s*$|from\s+[\w.]+\s+import\s|print\(|(?:if|elif|while)\s.*:\s*$|for\s+\w+\s+in\s.*:\s*$|else:\s*$|[\w.\[\]]+\s*=\s*[\w\[{(''"].*$|[\w.]+\([^)]*\)\s*$)'
+  not:
+    regex: '^#\s*(type:|noqa|pragma|fmt:|pylint:|mypy:|!|-\*-)'

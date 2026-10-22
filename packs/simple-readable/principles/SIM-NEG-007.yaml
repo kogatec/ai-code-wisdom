@@ -1,0 +1,21 @@
+id: SIM-NEG-007
+version: 0.1.0
+title: 真偽値の名前は肯定形にする
+summary: 真偽値は isEnabled のような肯定形で名付け、isNot... を避ける
+level: advisory
+styles: { simple_readable: 1.0 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when: []
+rationale: >
+  否定形の名前は、否定と組み合わさると二重否定になり、読み間違いを生む。
+checks:
+  static: [sim-neg-007-ts-negative-name, sim-neg-007-py-negative-name]
+  review: 二重否定（!isNotX、not is_not_x）になっている条件がないか
+  tests: なし
+example:
+  bad: "if (!isNotReady) start()"
+  good: "if (isReady) start()"
+tensions: []
+evidence: { tools: [], repos: [] }
+confidence: null
+validation: 未評価

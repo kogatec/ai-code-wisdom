@@ -1,0 +1,53 @@
+id: maintainable
+version: 0.1.1
+name: 保守性・長期運用重視型
+description: 何年も、人が入れ替わっても、安全に変更し続けられるコードを書く
+values: [責務の分離, 依存の管理, テストの充実, 後方互換性, 判断の記録]
+suited_for:
+  - 長期間運用する業務システム・SaaS
+  - 複数のチームや外部の利用者が使うライブラリ・API
+  - メンバーの入れ替わりがあるプロダクト
+tradeoffs:
+  - テスト・型・文書の分だけ、最初の実装には時間がかかる
+  - "構造を先に整えるため、試作段階では過剰になりやすい（phase: prototype では advisory の原則と info の検査を外す）"
+languages: [typescript, python]
+
+# このパックに mandatory の原則はない。違反は AI に知らせるが、止めない
+enforcement:
+  block: なし（mandatory の原則を含まないため）
+  warn: すべての違反を AI に知らせる。severity が info のものは、作業の報告にまとめて載せるだけにする
+  allow_inline: '理由を書いたコメント（wisdom-allow <原則ID>: 理由）がある箇所は、例外として監査の一覧に載せる'
+
+# MNT-TEST-003 / 004 はテストが対象なので、テストのパスは除外しない
+exclude_paths: []
+
+# L0（常駐ルール）に載せる順。summary を1行ずつ使う
+principles:
+  - MNT-TEST-003
+  - MNT-CHANGE-015
+  - MNT-DEP-002
+  - MNT-MOD-001
+  - MNT-API-005
+  - MNT-TYPE-006
+  - MNT-ERR-007
+  - MNT-SIDE-012
+  - MNT-STATE-013
+  - MNT-TEST-004
+  - MNT-CONFIG-008
+  - MNT-DEPS-010
+  - MNT-LOG-011
+  - MNT-DOC-014
+  - MNT-TODO-009
+
+thresholds:
+  file_max_lines: 400
+  relative_import_max_depth: 2
+
+requires:
+  ast-grep: ">=0.45"
+  optional: [tsc, mypy, dependency-cruiser, import-linter, diff-cover, api-extractor, griffe, npm-audit, pip-audit]
+
+verification:
+  rule_tests: 静的ルール32本すべて、テストケース（検出すべき例・検出してはいけない例）を通過（ast-grep 0.45.3）
+  effect: 未評価（評価の仕組みを作ってから測る）
+  evidence: ESLint・Pylint など既存ツールの対応ルールへの参照のみ。リポジトリからの根拠は Phase 3 で付ける

@@ -1,0 +1,23 @@
+id: SIM-FN-001
+version: 0.1.0
+title: 関数は1つのことだけをし、短く保つ
+summary: 関数は1つのことだけをし、60行を超えたら意味のまとまりで分ける
+level: default
+styles: { simple_readable: 1.0, maintainable: 0.6 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when:
+  - 分岐の少ない一直線の処理（設定の列挙・対応表など）
+rationale: >
+  長い関数は、全体を頭に入れないと一部を変更できない。
+  まとまりごとに名前を付けて分ければ、名前が要約の役目を果たし、読む量が減る。
+checks:
+  static: [sim-fn-001-ts-long-function, sim-fn-001-py-long-function]
+  review: 関数名を「〜して〜する」と説明しないといけない（2つ以上のことをしている）関数がないか
+  tests: 分けた関数ごとに、単独でテストできるか確かめる
+example:
+  bad: "function checkout() { /* 検証・在庫確保・決済・メール送信が100行 */ }"
+  good: "function checkout() { validate(cart); reserve(cart); charge(cart); notify(user) }"
+tensions: [{ axis: abstraction, direction: more }]
+evidence: { tools: [eslint:max-lines-per-function, pylint:R0915], repos: [] }
+confidence: null
+validation: 未評価

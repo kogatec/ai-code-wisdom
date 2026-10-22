@@ -1,0 +1,48 @@
+id: mnt-err-007-ts-throw-literal
+language: TypeScript
+severity: warning
+message: Error ではない値（文字列など）を throw しています
+note: Error（またはそれを継承した独自のエラークラス）を throw してください。スタックトレースが残り、種類で判別できます。
+metadata: { principle: MNT-ERR-007 }
+rule:
+  kind: throw_statement
+  has:
+    any:
+      - kind: string
+      - kind: template_string
+      - kind: number
+---
+id: mnt-err-007-ts-message-compare
+language: TypeScript
+severity: warning
+message: エラーをメッセージの文字列で判別しています
+note: 'エラーのクラス（instanceof）か、code などの決まった値で判別してください。メッセージは文言の変更で簡単に変わります。'
+metadata: { principle: MNT-ERR-007 }
+rule:
+  any:
+    - kind: binary_expression
+      regex: '\.message\s*[!=]==?|[!=]==?\s*[\w.]+\.message\b'
+    - kind: call_expression
+      has: { field: function, regex: '\.message\.(includes|startsWith|endsWith|match|indexOf|search)$' }
+---
+id: mnt-err-007-py-str-compare
+language: Python
+severity: warning
+message: 例外をメッセージの文字列で判別しています
+note: except で例外の型ごとに分けて捕まえてください。メッセージは文言の変更で簡単に変わります。
+metadata: { principle: MNT-ERR-007 }
+rule:
+  kind: comparison_operator
+  all:
+    - has: { kind: call, regex: '^str\(\w+\)$' }
+    - has: { kind: string }
+---
+id: mnt-err-007-py-generic-exception
+language: Python
+severity: warning
+message: 汎用の Exception を raise しています
+note: ValueError など標準の具体的な例外か、独自の例外クラスを raise してください。呼び出し側が種類で処理を分けられます。
+metadata: { principle: MNT-ERR-007 }
+rule:
+  kind: raise_statement
+  regex: '^raise\s+(Exception|BaseException)\s*\('

@@ -1,0 +1,23 @@
+id: SIM-NAME-004
+version: 0.1.0
+title: 名前で中身が分かるようにする
+summary: 名前は中身が分かる語にする。1文字・tmp・data2 のような名前を避ける
+level: advisory
+styles: { simple_readable: 1.0, maintainable: 0.6 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when:
+  - ループの添字（i, j, k）、座標（x, y, z）、ごく短いラムダの引数
+rationale: >
+  名前はコードを読む人が最初に受け取る説明。
+  中身の分からない名前は、定義までさかのぼって読ませる。
+checks:
+  static: [sim-name-004-ts-vague-name, sim-name-004-py-vague-name]
+  review: 関数名が実際の動作と合っているか（get なのに書き込む、など）。単位（ms / sec）が必要な名前に付いているか
+  tests: なし
+example:
+  bad: "const tmp = orders.filter(o => !o.paid)"
+  good: "const unpaidOrders = orders.filter(o => !o.paid)"
+tensions: []
+evidence: { tools: [eslint:id-length, pylint:C0103], repos: [] }
+confidence: null
+validation: 未評価

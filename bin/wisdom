@@ -1,0 +1,13 @@
+#!/bin/sh
+# シンボリックリンク経由で呼ばれても、この場所を解決して cli.ts を実行する
+SELF="$0"
+while [ -h "$SELF" ]; do
+  DIR=$(cd "$(dirname "$SELF")" && pwd)
+  LINK=$(readlink "$SELF")
+  case "$LINK" in
+    /*) SELF="$LINK" ;;
+    *) SELF="$DIR/$LINK" ;;
+  esac
+done
+DIR=$(cd "$(dirname "$SELF")" && pwd)
+exec node "$DIR/../src/cli.ts" "$@"

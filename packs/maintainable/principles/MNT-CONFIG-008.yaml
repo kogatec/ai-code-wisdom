@@ -1,0 +1,23 @@
+id: MNT-CONFIG-008
+version: 0.1.0
+title: 環境ごとに変わる値は、コードではなく設定に置く
+summary: 接続先・認証情報・機能の切り替えは設定から読み、起動時にまとめて検証する
+level: default
+styles: { maintainable: 1.0, security_resilience: 0.6 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when:
+  - 環境によらず変わらない値（公開の仕様書の URL など）
+rationale: >
+  接続先がコードに散らばっていると、環境を増やすたびにコードを書き換えることになり、本番を指したまま検証する事故も起きる。
+  設定を1か所で読み、起動時に検証すれば、足りない設定にすぐ気づける。
+checks:
+  static: [mnt-config-008-ts-hardcoded-endpoint, mnt-config-008-py-hardcoded-endpoint]
+  review: 設定を読む場所が1か所にまとまっているか（コードのあちこちで process.env / os.environ を読んでいないか）。必須の設定がないとき起動時に止まるか
+  tests: 必須の設定が欠けているとき、起動時に分かりやすいエラーで止まることを確かめる
+example:
+  bad: "fetch('https://api.payments-prod.internal/v1/charge')"
+  good: "const config = loadConfig(); fetch(`${config.paymentsBaseUrl}/charge`)"
+tensions: []
+evidence: { tools: [], repos: [] }
+confidence: null
+validation: 未評価

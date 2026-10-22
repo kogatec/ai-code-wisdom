@@ -1,0 +1,55 @@
+id: res-err-010-ts-empty-catch
+valid:
+  - try { save(); } catch (e) { logger.error(e); throw e; }
+  - try { fs.unlinkSync(tmp); } catch { /* 一時ファイルが無いのは正常 */ }
+invalid:
+  - try { save(); } catch (e) {}
+  - try { save(); } catch {}
+---
+id: res-err-010-ts-empty-promise-catch
+valid:
+  - p.catch((e) => logger.error(e));
+invalid:
+  - fetchData().catch(() => {});
+  - p.catch(() => null);
+  - p.catch(function () {});
+---
+id: res-err-010-py-except-pass
+valid:
+  - |
+    try:
+        save()
+    except FileNotFoundError:
+        # 無いのは正常
+        pass
+  - |
+    try:
+        save()
+    except Exception:
+        logger.exception("save failed")
+        raise
+invalid:
+  - |
+    try:
+        save()
+    except Exception:
+        pass
+  - |
+    try:
+        save()
+    except Exception as e:
+        ...
+---
+id: res-err-010-py-bare-except
+valid:
+  - |
+    try:
+        x()
+    except ValueError:
+        log()
+invalid:
+  - |
+    try:
+        x()
+    except:
+        log()

@@ -1,0 +1,25 @@
+id: SIM-DEAD-009
+version: 0.1.0
+title: 使われないコードを残さない
+summary: 実行されないコード・使われない変数や import は消す
+level: default
+styles: { simple_readable: 1.0, maintainable: 0.8 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when: []
+rationale: >
+  使われないコードも、読む人はそれが使われているかを確かめなければならない。
+  消しても git の履歴には残る。
+checks:
+  static: [sim-dead-009-ts-unreachable, sim-dead-009-py-unreachable]
+  external:
+    - { engine: tsc, rule: "noUnusedLocals / noUnusedParameters / allowUnreachableCode: false" }
+    - { engine: ruff, rule: "F401（未使用の import）/ F841（未使用の変数）" }
+  review: 呼び出し元がなくなった関数・設定・フラグが残っていないか
+  tests: なし
+example:
+  bad: "return parse(x); log('parsed')"
+  good: "log('parsing'); return parse(x)"
+tensions: []
+evidence: { tools: [eslint:no-unreachable, pylint:W0101], repos: [] }
+confidence: null
+validation: 未評価

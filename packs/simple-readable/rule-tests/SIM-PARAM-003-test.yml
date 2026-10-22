@@ -1,0 +1,29 @@
+id: sim-param-003-ts-many-params
+valid:
+  - 'function createUser(name: string, email: string, role: Role, team: Team) {}'
+  - 'function createUser(input: CreateUserInput) {}'
+  - |
+    class UserService {
+      constructor(private a: A, private b: B, private c: C, private d: D, private e: E) {}
+    }
+invalid:
+  - 'function createUser(name: string, email: string, role: Role, team: Team, active: boolean) {}'
+  - 'const f = (a, b, c, d, e) => a;'
+---
+id: sim-param-003-py-many-params
+valid:
+  - |
+    def create_user(name, email, role, team):
+        pass
+  - |
+    class Users:
+        def create(self, name, email, role, team):
+            pass
+invalid:
+  - |
+    def create_user(name, email, role, team, active):
+        pass
+  - |
+    class Users:
+        def create(self, name, email, role, team, active):
+            pass

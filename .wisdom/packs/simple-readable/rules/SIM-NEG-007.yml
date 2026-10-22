@@ -1,0 +1,37 @@
+id: sim-neg-007-ts-negative-name
+language: TypeScript
+severity: info
+message: 真偽値の名前が否定形（isNot... / hasNo...）です
+note: 'isEnabled のような肯定形の名前にしてください。否定形だと !isNotReady のような二重否定が生まれます。'
+metadata: { principle: SIM-NEG-007 }
+utils:
+  negative-name:
+    regex: '^(is|has|can|should|was|did)(Not|No)[A-Z]'
+rule:
+  any:
+    - kind: variable_declarator
+      has: { field: name, matches: negative-name }
+    - kind: function_declaration
+      has: { field: name, matches: negative-name }
+    - kind: method_definition
+      has: { field: name, matches: negative-name }
+    - kind: required_parameter
+      has: { field: pattern, matches: negative-name }
+    - kind: property_signature
+      has: { field: name, matches: negative-name }
+---
+id: sim-neg-007-py-negative-name
+language: Python
+severity: info
+message: 真偽値の名前が否定形（is_not_... / has_no_...）です
+note: is_enabled のような肯定形の名前にしてください。否定形だと not is_not_ready のような二重否定が生まれます。
+metadata: { principle: SIM-NEG-007 }
+utils:
+  negative-name:
+    regex: '^(is|has|can|should|was|did)_(not|no)_'
+rule:
+  any:
+    - kind: assignment
+      has: { field: left, matches: negative-name }
+    - kind: function_definition
+      has: { field: name, matches: negative-name }

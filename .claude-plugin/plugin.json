@@ -1,0 +1,14 @@
+{
+  "name": "ai-code-wisdom",
+  "displayName": "AI Code Wisdom",
+  "version": "0.2.0",
+  "description": "ユーザーが選んだ設計スタイルを、AI が開発から保守まで守り続けるための原則パック・自動検査・レビュー",
+  "author": { "name": "AI Code Wisdom" },
+  "keywords": ["design-principles", "code-quality", "static-analysis", "ast-grep", "security", "maintainability"],
+  "mcpServers": {
+    "wisdom": {
+      "command": "node",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/src/cli.ts", "mcp"]
+    }
+  }
+}

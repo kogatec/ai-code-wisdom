@@ -1,0 +1,25 @@
+id: SIM-DUP-011
+version: 0.1.0
+title: 同じ知識を3か所に書いたら、1か所にまとめる
+summary: 同じ判断・計算が3か所に現れたら、1つの関数や定数にまとめる
+level: default
+styles: { simple_readable: 0.8, maintainable: 1.0 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when:
+  - 見た目が似ているだけで、変わる理由が違うコード（まとめると、片方の変更がもう片方を壊す）
+rationale: >
+  同じ知識が複数の場所にあると、変更のたびに全部を探して直す必要があり、直し漏れが不具合になる。
+  ただし、まとめるのは「同じ理由で変わるもの」だけにする。
+checks:
+  static: []
+  external:
+    - { engine: jscpd, rule: "重複の検出（例：--min-lines 8）" }
+  review: 新しく書いた処理と同じものが、既にリポジトリ内にないか。まとめた結果、無関係な処理どうしが結び付いていないか
+  tests: まとめた関数を、元の各呼び出し元の条件でテストする
+example:
+  bad: "price * 1.1 がカート・注文・請求書の3か所に書かれている"
+  good: "const withTax = (price) => price * TAX_RATE を1か所に置いて呼ぶ"
+tensions: [{ axis: abstraction, direction: more }]
+evidence: { tools: [jscpd], repos: [] }
+confidence: null
+validation: 未評価

@@ -1,0 +1,25 @@
+id: sim-name-004-ts-vague-name
+language: TypeScript
+severity: info
+message: 変数名から中身が分かりません（1文字・tmp・foo・data2 など）
+note: 何が入っているかが分かる名前にしてください。ループの添字（i, j, k）や座標（x, y）はそのままで構いません。
+metadata: { principle: SIM-NAME-004 }
+rule:
+  kind: variable_declarator
+  has:
+    field: name
+    kind: identifier
+    regex: '^([a-dfghlmo-wA-Z]|tmp\d*|temp\d*|foo|bar|baz|stuff|thing\d*|data\d+|obj\d+|val\d+|res\d+|result\d+)$'
+---
+id: sim-name-004-py-vague-name
+language: Python
+severity: info
+message: 変数名から中身が分かりません（1文字・tmp・foo・data2 など）
+note: 何が入っているかが分かる名前にしてください。ループの添字（i, j, k）や座標（x, y）はそのままで構いません。
+metadata: { principle: SIM-NAME-004 }
+rule:
+  kind: assignment
+  has:
+    field: left
+    kind: identifier
+    regex: '^([a-dfghlmo-wA-Z]|tmp\d*|temp\d*|foo|bar|baz|stuff|thing\d*|data\d+|obj\d+|val\d+|res\d+|result\d+)$'

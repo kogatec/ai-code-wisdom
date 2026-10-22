@@ -1,0 +1,22 @@
+id: sec-deser-009-py-pickle
+valid:
+  - obj = json.loads(data)
+  - blob = pickle.dumps(obj)
+invalid:
+  - obj = pickle.loads(data)
+---
+id: sec-deser-009-py-yaml-load
+valid:
+  - cfg = yaml.safe_load(text)
+  - cfg = yaml.load(text, Loader=yaml.SafeLoader)
+invalid:
+  - cfg = yaml.load(text)
+  - cfg = yaml.load(text, Loader=yaml.Loader)
+  - cfg = yaml.unsafe_load(text)
+---
+id: sec-deser-009-ts-unsafe-lib
+valid:
+  - import { parse } from "yaml";
+invalid:
+  - const serialize = require("node-serialize");
+  - import serialize from "node-serialize";

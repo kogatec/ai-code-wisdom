@@ -1,0 +1,41 @@
+id: sec-iv-001-ts-raw-request
+language: TypeScript
+severity: error
+message: 外部入力（req.body / query / params）をスキーマで検証せずに使っています
+note: 境界でスキーマ（Zod など）の parse / safeParse を通し、検証済みの値だけを内側へ渡してください。
+metadata: { principle: SEC-IV-001 }
+rule:
+  kind: member_expression
+  all:
+    - has: { field: object, regex: '^(req|request|ctx\.request)$' }
+    - has: { field: property, regex: '^(body|query|params)$' }
+  not:
+    inside:
+      kind: arguments
+      stopBy: end
+      inside:
+        kind: call_expression
+        all:
+          - has: { field: function, regex: '\.(parse|safeParse|parseAsync|safeParseAsync|validate|validateSync|assert|decode)$' }
+          - not: { has: { field: function, regex: '^JSON\.' } }
+---
+id: sec-iv-001-py-raw-request
+language: Python
+severity: error
+message: 外部入力（request.json / args / form など）をスキーマで検証せずに使っています
+note: 境界で Pydantic の model_validate や marshmallow の load を通し、検証済みの値だけを内側へ渡してください。
+metadata: { principle: SEC-IV-001 }
+rule:
+  kind: attribute
+  all:
+    - has: { field: object, regex: '^request$' }
+    - has: { field: attribute, regex: '^(json|form|args|values|data|files|get_json)$' }
+  not:
+    inside:
+      kind: argument_list
+      stopBy: end
+      inside:
+        kind: call
+        all:
+          - has: { field: function, regex: '(model_validate|model_validate_json|parse_obj|validate|load|loads)$' }
+          - not: { has: { field: function, regex: '^json\.' } }

@@ -1,0 +1,21 @@
+id: sim-scope-015-ts-var
+valid:
+  - const total = sum(items);
+  - let count = 0;
+invalid:
+  - var total = sum(items);
+---
+id: sim-scope-015-py-shadow-builtin
+valid:
+  - items = load()
+  - |
+    def get_user(user_id):
+        pass
+invalid:
+  - list = load()
+  - |
+    def get_user(id):
+        pass
+  - |
+    def show(type="text"):
+        pass

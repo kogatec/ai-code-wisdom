@@ -1,0 +1,27 @@
+id: SEC-IV-001
+version: 0.1.0
+title: 外部入力は境界で一度だけ検証し、内側では検証済みの型だけを扱う
+summary: 外部入力は入口でスキーマ検証し、内側には検証済みの値だけを渡す
+level: mandatory
+styles: { security_resilience: 1.0, type_safety: 0.6 }
+applies_when:
+  languages: [typescript, python]
+  layers: [api_handler, cli_entry, file_loader, message_consumer]
+not_when:
+  - 外部入力を受けない内部処理
+rationale: >
+  検証があちこちに散らばると、検証漏れと二重検証が同時に起きる。
+  入口で型に変換すれば、内側のコードは不正な値を考えなくてよくなる。
+checks:
+  static: [sec-iv-001-ts-raw-request, sec-iv-001-py-raw-request]
+  review: 新しく追加された外部入力の入口（API・CLI 引数・ファイル・キューのメッセージ）に、スキーマによる検証があるか
+  tests: 型違い・範囲外・必須項目の欠落を入力し、明確なエラー（400 など）になることを確かめる
+example:
+  bad: "db.insert(req.body)"
+  good: "const input = CreateUser.parse(req.body); db.insert(input)"
+tensions: [{ axis: abstraction, direction: more }]
+evidence:
+  standards: [CWE-20]
+  repos: []   # Phase 3 で付与
+confidence: null
+validation: 未評価

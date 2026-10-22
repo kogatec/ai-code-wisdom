@@ -1,0 +1,15 @@
+id: res-async-013-ts-then-without-catch
+valid:
+  - await sendEmail(user).then(() => log("sent"));
+  - sendEmail(user).then(ok).catch(handle);
+  - void refresh().then(update);
+invalid:
+  - sendEmail(user).then(() => log("sent"));
+---
+id: res-async-013-py-orphan-task
+valid:
+  - task = asyncio.create_task(worker())
+  - background_tasks.add(asyncio.create_task(worker()))
+invalid:
+  - asyncio.create_task(worker())
+  - loop.create_task(worker())

@@ -1,0 +1,24 @@
+id: RES-TIMEOUT-011
+version: 0.1.0
+title: 外部への呼び出しには、必ずタイムアウトを付ける
+summary: HTTP・DB・キューなど外部への呼び出しには必ずタイムアウトを付ける
+level: default
+styles: { security_resilience: 1.0, performance: 0.5 }
+applies_when:
+  languages: [typescript, python]
+  layers: [external_call]
+not_when: []
+rationale: >
+  タイムアウトがないと、相手が応答しないだけで、待っている側の接続やスレッドが尽きる。
+  1つの依存先の遅れが、システム全体の停止に広がる。
+checks:
+  static: [res-timeout-011-ts-fetch, res-timeout-011-py-http]
+  review: HTTP クライアント・DB 接続プール・キューの受信に、接続と読み取りのタイムアウトが設定されているか（静的検査は fetch / requests / urlopen しか見ない）
+  tests: 応答しない相手（テスト用の遅延サーバー）に対して、決めた時間内にエラーで戻ることを確かめる
+example:
+  bad: "await fetch(url)"
+  good: "await fetch(url, { signal: AbortSignal.timeout(5000) })"
+tensions: []
+evidence: { standards: [CWE-1088, CWE-400], repos: [] }
+confidence: null
+validation: 未評価

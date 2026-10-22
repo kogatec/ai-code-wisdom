@@ -1,0 +1,23 @@
+id: SIM-ELSE-008
+version: 0.1.0
+title: return の後に else を書かない
+summary: return / throw で抜けた後に else を書かず、続きをそのまま書く
+level: advisory
+styles: { simple_readable: 1.0 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when:
+  - else if / elif が続く分岐（全体で1つの分岐として読めるため）
+rationale: >
+  抜けた後の else は不要な入れ子を1段増やす。
+  外せば、本筋の処理が左端にそろう。
+checks:
+  static: [sim-else-008-ts-else-after-return, sim-else-008-py-else-after-return]
+  review: なし
+  tests: なし
+example:
+  bad: "if (!x) { return null } else { return parse(x) }"
+  good: "if (!x) return null; return parse(x)"
+tensions: []
+evidence: { tools: [eslint:no-else-return, pylint:R1705], repos: [] }
+confidence: null
+validation: 未評価

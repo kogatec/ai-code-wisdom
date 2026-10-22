@@ -1,0 +1,38 @@
+id: mnt-test-003-ts-test-without-assertion
+language: TypeScript
+severity: warning
+message: 何も確かめていないテストです（expect / assert がありません）
+note: 期待する結果を expect で確かめてください。確かめないテストは、壊れても失敗しません。
+metadata: { principle: MNT-TEST-003 }
+rule:
+  kind: call_expression
+  all:
+    - has: { field: function, regex: '^(it|test)$' }
+    - has:
+        field: arguments
+        has:
+          any:
+            - kind: arrow_function
+            - kind: function_expression
+    - not:
+        has:
+          stopBy: end
+          kind: call_expression
+          has: { field: function, regex: '(^|\.)(expect|expectTypeOf|verify\w*)$|^assert(\.|$)|^(t|tap)\.\w+$' }
+---
+id: mnt-test-003-py-test-without-assertion
+language: Python
+severity: warning
+message: 何も確かめていないテストです（assert がありません）
+note: 期待する結果を assert で確かめてください。確かめないテストは、壊れても失敗しません。
+metadata: { principle: MNT-TEST-003 }
+rule:
+  kind: function_definition
+  has: { field: name, regex: '^test_' }
+  not:
+    has:
+      stopBy: end
+      any:
+        - kind: assert_statement
+        - kind: call
+          has: { field: function, regex: '(^|\.)(assert\w*|raises|warns|fail)$' }

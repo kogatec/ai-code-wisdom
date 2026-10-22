@@ -1,0 +1,26 @@
+id: ts-user-search
+title: ユーザー検索（SQLite）
+language: typescript
+profile:
+  primary: security-resilience
+  secondary:
+    - maintainable
+# 隠しテストの件数（通過率の分母。--dry-run で実際の件数と一致するか確かめる）
+test:
+  functional: 10
+  robustness: 6
+steps:
+  - |
+    ユーザー名で検索する関数を作ってください。
+
+    - `src/users.ts` に `searchUsers(db, name)` を export してください。
+    - `db` は `node:sqlite` の `DatabaseSync` です（`src/db.ts` の `openDb()` で作れる、`users` 表を持つ DB）。
+    - `name` を名前に含むユーザーを返します（部分一致）。戻り値は `{ id: number; name: string; email: string }[]` で、`id` の昇順に並べてください。
+    - 一致するユーザーがいなければ、空の配列を返します。
+  - |
+    `searchUsers` に、並び替えと件数の絞り込みを追加してください。
+
+    - 第 3 引数に、省略できるオプション `{ sort?: "name" | "created_at"; order?: "asc" | "desc"; limit?: number; offset?: number }` を受け取れるようにします。
+    - `sort` は並び替えに使う列です。省略したときは今までどおり `id` の昇順にします。`order` は `"asc"`（昇順）か `"desc"`（降順）で、省略したときは `"asc"` です。
+    - `limit` は返す最大件数、`offset` は先頭から読み飛ばす件数です。どちらも省略できます（`limit` だけ、`offset` だけの指定も使えるようにしてください）。
+    - 今までの `searchUsers(db, name)` の呼び方も、今までどおり動くようにしてください。

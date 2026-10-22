@@ -1,0 +1,23 @@
+id: sim-cond-006-ts-complex-condition
+language: TypeScript
+severity: info
+message: '&& / || が3つ以上つながった条件式です'
+note: 'const canCheckout = isLoggedIn && hasItems のように、条件のまとまりに名前を付けてください。'
+metadata: { principle: SIM-COND-006 }
+rule:
+  kind: binary_expression
+  regex: '(&&|\|\|)[\s\S]*(&&|\|\|)[\s\S]*(&&|\|\|)'
+  not:
+    inside: { kind: binary_expression }
+---
+id: sim-cond-006-py-complex-condition
+language: Python
+severity: info
+message: and / or が3つ以上つながった条件式です
+note: can_checkout = is_logged_in and has_items のように、条件のまとまりに名前を付けてください。
+metadata: { principle: SIM-COND-006 }
+rule:
+  kind: boolean_operator
+  regex: '\b(and|or)\b[\s\S]*\b(and|or)\b[\s\S]*\b(and|or)\b'
+  not:
+    inside: { kind: boolean_operator }

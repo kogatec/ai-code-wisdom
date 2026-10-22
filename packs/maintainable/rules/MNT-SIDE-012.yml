@@ -1,0 +1,36 @@
+id: mnt-side-012-ts-import-time-io
+language: TypeScript
+severity: info
+message: モジュールを読み込んだだけで、通信やファイル操作が実行されます
+note: 関数の中に移し、起動処理から明示的に呼んでください。読み込みだけで外部に触れると、テストや再利用が難しくなります。
+metadata: { principle: MNT-SIDE-012 }
+rule:
+  kind: call_expression
+  has: { field: function, regex: '^(fetch|axios(\.\w+)?|fs\.\w+Sync|readFileSync|writeFileSync|execSync|spawnSync)$' }
+  not:
+    inside:
+      stopBy: end
+      any:
+        - kind: function_declaration
+        - kind: generator_function_declaration
+        - kind: arrow_function
+        - kind: function_expression
+        - kind: method_definition
+---
+id: mnt-side-012-py-import-time-io
+language: Python
+severity: warning
+message: モジュールを読み込んだだけで、通信・ファイル操作・外部コマンドが実行されます
+note: 関数の中に移し、起動処理から明示的に呼んでください。読み込みだけで外部に触れると、テストや再利用が難しくなります。
+metadata: { principle: MNT-SIDE-012 }
+rule:
+  kind: call
+  has: { field: function, regex: '^(requests\.\w+|httpx\.(get|post|put|patch|delete|request)|urlopen|urllib\.request\.urlopen|open|sqlite3\.connect|psycopg2?\.connect|pymysql\.connect|subprocess\.\w+|os\.system|time\.sleep)$' }
+  not:
+    inside:
+      stopBy: end
+      any:
+        - kind: function_definition
+        - kind: lambda
+        - kind: if_statement
+          has: { field: condition, regex: '__name__' }

@@ -1,0 +1,26 @@
+id: MNT-CHANGE-015
+version: 0.1.0
+title: 変更は小さく、目的ごとに分ける
+summary: 1つの変更には1つの目的だけを入れ、リファクタリングと振る舞いの変更を混ぜない
+level: default
+styles: { maintainable: 1.0 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when: []
+rationale: >
+  目的の違う変更が混ざると、レビューで見落としが増え、問題が起きたときに一部だけ戻すこともできない。
+  小さく分ければ、それぞれを確実に確かめて、安全に戻せる。
+checks:
+  static: []   # 変更全体（差分）を見る必要があるため、1つのファイルの検査では判定できない
+  external:
+    - { engine: ci, rule: "変更行数が多い差分に警告（例：400 行超）" }
+  review: >
+    今回の変更に、依頼と関係のない整形・改名・リファクタリングが混ざっていないか。
+    リファクタリングと振る舞いの変更が同じコミットに入っていないか
+  tests: リファクタリングだけのコミットでは、既存のテストを変えずに通ることを確かめる
+example:
+  bad: "「バグ修正」のコミットに、無関係なファイルの整形と関数名の変更が混ざっている"
+  good: "1) 関数名の変更（振る舞いは同じ） 2) バグ修正＋再現テスト、の2つのコミットに分ける"
+tensions: []
+evidence: { tools: [], repos: [] }
+confidence: null
+validation: 未評価

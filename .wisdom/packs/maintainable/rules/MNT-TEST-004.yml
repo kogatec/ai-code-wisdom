@@ -1,0 +1,43 @@
+id: mnt-test-004-ts-focused-test
+language: TypeScript
+severity: error
+message: .only が残っています（他のテストが実行されなくなります）
+note: .only を外してください。
+metadata: { principle: MNT-TEST-004 }
+rule:
+  kind: call_expression
+  has: { field: function, regex: '^(it|describe|test|context|suite)\.only$|^(fit|fdescribe)$' }
+---
+id: mnt-test-004-ts-skipped-test
+language: TypeScript
+severity: info
+message: スキップしたテストがあります
+note: 直すか消してください。残すなら、理由と、いつまでに直すか（課題番号）をコメントに書いてください。
+metadata: { principle: MNT-TEST-004 }
+rule:
+  kind: call_expression
+  has: { field: function, regex: '^(it|describe|test)\.skip$|^(xit|xdescribe|xtest)$' }
+---
+id: mnt-test-004-py-skip-without-reason
+language: Python
+severity: warning
+message: 理由のない pytest.mark.skip があります
+note: '@pytest.mark.skip(reason="...") のように理由を書いてください。条件付きなら skipif を使ってください。'
+metadata: { principle: MNT-TEST-004 }
+rule:
+  kind: decorator
+  regex: '^@pytest\.mark\.skip(\(\))?$'
+---
+id: mnt-test-004-py-sleep-in-test
+language: Python
+severity: warning
+message: テストの中で sleep しています
+note: 時間に頼るテストは遅く、ときどき失敗します。時刻は差し替え（freezegun など）、非同期処理は完了を待つ仕組みを使ってください。
+metadata: { principle: MNT-TEST-004 }
+rule:
+  kind: call
+  has: { field: function, regex: '^(time\.)?sleep$' }
+  inside:
+    stopBy: end
+    kind: function_definition
+    has: { field: name, regex: '^test_' }

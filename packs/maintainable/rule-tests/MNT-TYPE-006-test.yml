@@ -1,0 +1,22 @@
+id: mnt-type-006-ts-any
+valid:
+  - 'function parse(input: unknown): User { return UserSchema.parse(input); }'
+invalid:
+  - 'function parse(input: any) { return input; }'
+  - const user = JSON.parse(text) as any;
+---
+id: mnt-type-006-py-public-no-return-type
+valid:
+  - |
+    def total(items: list[Item]) -> int:
+        return sum(i.price for i in items)
+  - |
+    def _helper(x):
+        return x
+  - |
+    def test_total():
+        assert total([]) == 0
+invalid:
+  - |
+    def total(items):
+        return sum(i.price for i in items)

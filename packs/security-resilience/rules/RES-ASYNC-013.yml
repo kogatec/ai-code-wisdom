@@ -1,0 +1,23 @@
+id: res-async-013-ts-then-without-catch
+language: TypeScript
+severity: warning
+message: .then() の結果を待たず、失敗も処理していません
+note: await するか、.catch() で失敗を処理してください。意図的に待たないなら void を付けてください。
+metadata: { principle: RES-ASYNC-013 }
+rule:
+  kind: expression_statement
+  has:
+    kind: call_expression
+    has: { field: function, regex: '\.then$' }
+---
+id: res-async-013-py-orphan-task
+language: Python
+severity: warning
+message: create_task の戻り値を保持していません
+note: タスクへの参照を持たないと、途中で回収されたり例外が失われたりします。変数や集合に保持するか、asyncio.TaskGroup を使ってください。
+metadata: { principle: RES-ASYNC-013 }
+rule:
+  kind: expression_statement
+  has:
+    kind: call
+    has: { field: function, regex: '(^asyncio\.|\.)(create_task|ensure_future)$|^(create_task|ensure_future)$' }

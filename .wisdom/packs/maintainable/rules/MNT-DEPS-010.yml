@@ -1,0 +1,36 @@
+id: mnt-deps-010-ts-deprecated-api
+language: TypeScript
+severity: warning
+message: 非推奨の API を使っています
+note: 'new Buffer → Buffer.from / Buffer.alloc、substr → slice、url.parse → new URL()、fs.exists → fs.existsSync か fs.access、escape / unescape → encodeURIComponent / decodeURIComponent に置き換えてください。'
+metadata: { principle: MNT-DEPS-010 }
+rule:
+  any:
+    - pattern: new Buffer($$$)
+    - kind: call_expression
+      has: { field: function, regex: '\.substr$|^url\.parse$|^fs\.exists$|^(escape|unescape)$' }
+---
+id: mnt-deps-010-py-deprecated-api
+language: Python
+severity: warning
+message: 非推奨、または新しい Python で削除されたモジュール・関数を使っています
+note: 'datetime.utcnow() → datetime.now(timezone.utc)、asyncio.get_event_loop() → asyncio.run / get_running_loop、distutils → setuptools / packaging、pkg_resources → importlib.metadata / importlib.resources に置き換えてください。'
+metadata: { principle: MNT-DEPS-010 }
+rule:
+  any:
+    - kind: call
+      has: { field: function, regex: '(^|\.)(utcnow|utcfromtimestamp)$|^asyncio\.get_event_loop$' }
+    - kind: import_statement
+      regex: '^import\s+(imp|distutils|pkg_resources|asynchat|asyncore|cgi|cgitb|telnetlib|pipes)\b'
+    - kind: import_from_statement
+      regex: '^from\s+(imp|distutils|pkg_resources|asynchat|asyncore|cgi|cgitb|telnetlib|pipes)\b'
+---
+id: mnt-deps-010-py-typing-alias
+language: Python
+severity: info
+message: typing の古い型の別名（List / Dict など）を使っています
+note: Python 3.9 以降は list[int] / dict[str, int] のように組み込みの型をそのまま使ってください。
+metadata: { principle: MNT-DEPS-010 }
+rule:
+  kind: import_from_statement
+  regex: '^from\s+typing\s+import\s[\s\S]*\b(List|Dict|Set|Tuple|FrozenSet|Type|DefaultDict|Deque)\b'

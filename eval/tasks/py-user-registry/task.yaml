@@ -1,0 +1,26 @@
+id: py-user-registry
+title: ユーザー登録と認証
+language: python
+profile:
+  primary: maintainable
+  secondary:
+    - security-resilience
+# 隠しテストの件数（通過率の分母。--dry-run で実際の件数と一致するか確かめる）
+test:
+  functional: 11
+  robustness: 6
+steps:
+  - |
+    ユーザー登録とログイン確認の関数を作ってください。
+
+    - `registry.py` に `register(conn, email, password)` と `authenticate(conn, email, password)` を作ってください。`conn` は `db.py` の `connect()` が返す `sqlite3.Connection` です（`users` 表があります）。
+    - `register`：`users` 表に新しいユーザーを追加し、そのユーザーの `id`（`int`）を返します。パスワードは安全な方法でハッシュ化して `password_hash` 列に保存します。すでに同じメールアドレスが登録されていたら、`registry.py` で定義した `DuplicateEmailError` を送出します。
+    - `authenticate`：メールアドレスとパスワードが登録内容と一致すれば `True`、そうでなければ `False` を返します（メールアドレスが未登録のときも `False`）。
+    - 標準ライブラリだけを使ってください。
+  - |
+    パスワードのリセット機能を追加してください。`registry.py` に次の 2 つを作ります。
+
+    - `issue_reset_token(conn, email)`：登録済みのメールアドレスに対して、リセット用のトークン（`str`）を発行して返します。未登録のメールアドレスなら `UnknownEmailError` を送出します。
+    - `reset_password(conn, token, new_password)`：トークンが有効なら、そのユーザーのパスワードを `new_password` に変更します（変更後は、新しいパスワードで `authenticate` が `True` になり、古いパスワードでは `False` になります）。トークンは発行から 30 分で失効します。トークンが無効なとき、失効しているときは `InvalidTokenError` を送出します。
+    - `UnknownEmailError` と `InvalidTokenError` は、`registry.py` で定義してください。
+    - 現在時刻は、`import time` したうえで `time.time()` から取ってください（テストでは `time.time` を差し替えて、時間が経った状態を作ります）。

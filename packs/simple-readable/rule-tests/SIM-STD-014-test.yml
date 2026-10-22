@@ -1,0 +1,40 @@
+id: sim-std-014-ts-index-loop
+valid:
+  - for (const item of items) { ship(item); }
+  - for (let i = items.length - 1; i >= 0; i--) { ship(items[i]); }
+invalid:
+  - for (let i = 0; i < items.length; i++) { ship(items[i]); }
+---
+id: sim-std-014-ts-bool-compare
+valid:
+  - if (isReady) { go(); }
+  - if (value === null) { go(); }
+invalid:
+  - if (isReady === true) { go(); }
+  - if (done == false) { wait(); }
+---
+id: sim-std-014-py-range-len
+valid:
+  - |
+    for i, item in enumerate(items):
+        ship(i, item)
+  - |
+    for i in range(10):
+        tick(i)
+invalid:
+  - |
+    for i in range(len(items)):
+        ship(items[i])
+---
+id: sim-std-014-py-none-bool-compare
+valid:
+  - |
+    if value is None:
+        go()
+invalid:
+  - |
+    if value == None:
+        go()
+  - |
+    if done != False:
+        go()

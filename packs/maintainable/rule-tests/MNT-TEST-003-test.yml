@@ -1,0 +1,43 @@
+id: mnt-test-003-ts-test-without-assertion
+valid:
+  - |
+    it("adds tax", () => {
+      expect(withTax(100)).toBe(110);
+    });
+  - |
+    test("rejects", async () => {
+      await expect(load()).rejects.toThrow(NotFound);
+    });
+  - |
+    it("works", () => {
+      assert.equal(sum(1, 2), 3);
+    });
+  - it.todo("handles refunds");
+invalid:
+  - |
+    it("adds tax", () => {
+      withTax(100);
+    });
+  - |
+    test("loads", async function () {
+      const r = await load();
+      console.log(r);
+    });
+---
+id: mnt-test-003-py-test-without-assertion
+valid:
+  - |
+    def test_adds_tax():
+        assert with_tax(100) == 110
+  - |
+    def test_rejects():
+        with pytest.raises(NotFound):
+            load()
+  - |
+    def test_calls():
+        notify(user)
+        mailer.send.assert_called_once()
+invalid:
+  - |
+    def test_adds_tax():
+        with_tax(100)

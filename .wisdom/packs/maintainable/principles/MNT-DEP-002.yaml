@@ -1,0 +1,24 @@
+id: MNT-DEP-002
+version: 0.1.0
+title: 依存の向きを一方向に保つ
+summary: 依存は「画面・API → 業務ロジック → データ」の一方向にし、逆向きと循環を作らない
+level: default
+styles: { maintainable: 1.0, extensibility: 1.0 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when: []
+rationale: >
+  依存が循環したり逆向きになったりすると、1か所の変更がどこまで波及するか読めなくなる。
+  一方向なら、下の層は上の層を気にせずに変更できる。
+checks:
+  static: [mnt-dep-002-ts-deep-relative-import, mnt-dep-002-py-deep-relative-import]
+  external:
+    - { engine: dependency-cruiser, rule: "層の決まり（profile.yaml の layers から生成）と循環の禁止" }
+    - { engine: import-linter, rule: "Python 版の層の決まりと循環の禁止" }
+  review: 業務ロジックが、Web フレームワークや DB ドライバの型に直接依存していないか
+example:
+  bad: "domain/order.ts が import { prisma } from '../../../infra/db'"
+  good: "domain/order.ts は OrderRepository 型だけに依存し、infra 側がそれを実装する"
+tensions: [{ axis: abstraction, direction: more }]
+evidence: { tools: [dependency-cruiser, import-linter], repos: [] }
+confidence: null
+validation: 未評価

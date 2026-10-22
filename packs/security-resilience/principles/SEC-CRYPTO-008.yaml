@@ -1,0 +1,25 @@
+id: SEC-CRYPTO-008
+version: 0.1.0
+title: 暗号・乱数・通信は、安全な標準の方法を使い、既定の安全設定を崩さない
+summary: 秘密の値は暗号用乱数で作り、弱い暗号を使わず、TLS 検証を切らない
+level: mandatory
+styles: { security_resilience: 1.0 }
+applies_when:
+  languages: [typescript, python]
+  layers: [any]
+not_when:
+  - 秘密ではない用途（ジッター、チェックサム、テストデータ）の乱数・ハッシュ
+rationale: >
+  Math.random や random は予測できるため、トークンに使うと推測される。
+  TLS 検証を切ると、通信を盗み見・改ざんされても気づけない。
+checks:
+  static: [sec-crypto-008-ts-math-random-secret, sec-crypto-008-ts-weak-hash, sec-crypto-008-ts-weak-cipher, sec-crypto-008-ts-tls-off, sec-crypto-008-py-random-secret, sec-crypto-008-py-weak-hash, sec-crypto-008-py-tls-off]
+  review: パスワードの保存に argon2 / scrypt / bcrypt を使っているか。暗号を自作していないか
+  tests: 発行したトークンが十分な長さ（128 ビット以上）で、毎回異なることを確かめる
+example:
+  bad: "const resetToken = Math.random().toString(36)"
+  good: "const resetToken = crypto.randomBytes(32).toString('base64url')"
+tensions: []
+evidence: { standards: [CWE-338, CWE-327, CWE-295], repos: [] }
+confidence: null
+validation: 未評価

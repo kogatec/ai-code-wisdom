@@ -1,0 +1,19 @@
+id: sim-name-004-ts-vague-name
+valid:
+  - const unpaidOrders = orders.filter(isUnpaid);
+  - const i = 0;
+  - const x = point.x;
+  - const data = await res.json();
+invalid:
+  - const d = new Date();
+  - const tmp = orders.filter(isUnpaid);
+  - const data2 = transform(data);
+---
+id: sim-name-004-py-vague-name
+valid:
+  - unpaid_orders = [o for o in orders if not o.paid]
+  - _ = run()
+invalid:
+  - d = datetime.now()
+  - tmp = load()
+  - result2 = merge(a, b)

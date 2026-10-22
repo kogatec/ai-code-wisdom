@@ -1,0 +1,40 @@
+id: sim-nest-002-ts-deep-nesting
+valid:
+  - |
+    for (const o of orders) {
+      if (!o.paid) continue;
+      for (const item of o.items) {
+        if (item.qty > 0) ship(item);
+      }
+    }
+  - |
+    if (a) { x(); }
+    else if (b) { y(); }
+    else if (c) { z(); }
+    else if (d) { if (e) { w(); } }
+invalid:
+  - |
+    for (const o of orders) {
+      if (o.paid) {
+        for (const item of o.items) {
+          if (item.qty > 0) { ship(item); }
+        }
+      }
+    }
+---
+id: sim-nest-002-py-deep-nesting
+valid:
+  - |
+    for o in orders:
+        if not o.paid:
+            continue
+        for item in o.items:
+            if item.qty > 0:
+                ship(item)
+invalid:
+  - |
+    for o in orders:
+        if o.paid:
+            for item in o.items:
+                if item.qty > 0:
+                    ship(item)

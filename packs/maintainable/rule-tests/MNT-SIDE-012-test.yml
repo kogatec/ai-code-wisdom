@@ -1,0 +1,27 @@
+id: mnt-side-012-ts-import-time-io
+valid:
+  - |
+    export function loadConfig() {
+      return JSON.parse(fs.readFileSync("config.json", "utf8"));
+    }
+  - |
+    export const getUser = async (id) => (await fetch(`/users/${id}`)).json();
+invalid:
+  - const config = JSON.parse(fs.readFileSync("config.json", "utf8"));
+  - const flags = await fetch(FLAGS_URL);
+---
+id: mnt-side-012-py-import-time-io
+valid:
+  - |
+    def load_config():
+        with open("config.json") as f:
+            return json.load(f)
+  - |
+    if __name__ == "__main__":
+        requests.get(URL, timeout=5)
+invalid:
+  - |
+    import json
+    with open("config.json") as f:
+        CONFIG = json.load(f)
+  - FLAGS = requests.get(FLAGS_URL, timeout=5).json()

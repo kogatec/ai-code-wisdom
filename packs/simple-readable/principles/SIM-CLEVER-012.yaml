@@ -1,0 +1,23 @@
+id: SIM-CLEVER-012
+version: 0.1.0
+title: 巧妙な書き方より、素直な書き方を選ぶ
+summary: 入れ子の三項演算子・ビット演算の小技・for が2つ以上の内包表記を使わない
+level: default
+styles: { simple_readable: 1.0 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when:
+  - 計測して速度が必要と分かった箇所（理由をコメントに書く）
+rationale: >
+  短く書けても、読む人が頭の中で展開しないと分からない書き方は、読む時間を増やす。
+  コードは書く回数より読まれる回数の方がずっと多い。
+checks:
+  static: [sim-clever-012-ts-nested-ternary, sim-clever-012-ts-bit-trick, sim-clever-012-py-nested-conditional, sim-clever-012-py-multi-for-comprehension]
+  review: 1行に詰め込みすぎて、途中の値に名前がない式がないか
+  tests: なし
+example:
+  bad: "const label = isAdmin ? 'admin' : isOwner ? 'owner' : 'user'"
+  good: "function roleLabel(u) { if (u.isAdmin) return 'admin'; if (u.isOwner) return 'owner'; return 'user' }"
+tensions: []
+evidence: { tools: [eslint:no-nested-ternary], repos: [] }
+confidence: null
+validation: 未評価

@@ -1,0 +1,22 @@
+id: SIM-NEST-002
+version: 0.1.0
+title: 入れ子は浅く保ち、例外的な場合は先に抜ける
+summary: 制御構文の入れ子は3段まで。条件を満たさない場合は先に return / continue で抜ける
+level: default
+styles: { simple_readable: 1.0 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when: []
+rationale: >
+  入れ子が深いと、今どの条件の中にいるかを覚えながら読む必要がある。
+  例外的な場合を先に抜ければ、本筋の処理が左端にそろう。
+checks:
+  static: [sim-nest-002-ts-deep-nesting, sim-nest-002-py-deep-nesting]
+  review: 早期リターンで浅くできるのに、if の中に本筋の処理を書いていないか
+  tests: なし（振る舞いは変わらない）
+example:
+  bad: "for (o of orders) { if (o.paid) { for (i of o.items) { if (i.qty) { ship(i) } } } }"
+  good: "for (o of orders) { if (!o.paid) continue; o.items.filter(hasQty).forEach(ship) }"
+tensions: []
+evidence: { tools: [eslint:max-depth, pylint:R1702], repos: [] }
+confidence: null
+validation: 未評価

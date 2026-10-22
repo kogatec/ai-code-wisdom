@@ -1,0 +1,17 @@
+id: res-timeout-011-ts-fetch
+valid:
+  - 'await fetch(url, { signal: AbortSignal.timeout(5000) });'
+  - 'await fetch(url, { method: "GET", signal });'
+  - await fetch(url, opts);
+  - 'await fetch(url, { ...base, method: "GET" });'
+invalid:
+  - const r = await fetch(url);
+  - 'await fetch(url, { method: "POST", body });'
+---
+id: res-timeout-011-py-http
+valid:
+  - r = requests.get(url, timeout=(3, 10))
+  - r = requests.post(url, **kwargs)
+invalid:
+  - r = requests.get(url)
+  - body = urlopen(req).read()

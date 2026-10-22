@@ -1,0 +1,22 @@
+id: SIM-STD-014
+version: 0.1.0
+title: 言語と標準ライブラリの素直な書き方を使う
+summary: 添字ループより for...of / enumerate、真偽値はそのまま、None は is で判定する
+level: advisory
+styles: { simple_readable: 1.0 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when: []
+rationale: >
+  その言語でよく使われる書き方は、多くの人が一目で意味を読み取れる。
+  独自の書き方は、同じことをしていても読む人に確認の手間をかける。
+checks:
+  static: [sim-std-014-ts-index-loop, sim-std-014-ts-bool-compare, sim-std-014-py-range-len, sim-std-014-py-none-bool-compare]
+  review: 標準ライブラリにある処理（日付計算・パス操作・集計など）を自作していないか
+  tests: なし
+example:
+  bad: "for (let i = 0; i < items.length; i++) ship(items[i])"
+  good: "for (const item of items) ship(item)"
+tensions: []
+evidence: { tools: [pylint:C0200, pycodestyle:E711, pycodestyle:E712], repos: [] }
+confidence: null
+validation: 未評価

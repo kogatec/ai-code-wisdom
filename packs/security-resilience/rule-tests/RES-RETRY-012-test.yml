@@ -1,0 +1,39 @@
+id: res-retry-012-ts-unbounded-retry
+valid:
+  - |
+    let n = 0;
+    while (true) {
+      try { return await call(); }
+      catch (e) { if (++n >= 5) throw e; await sleep(backoff(n)); }
+    }
+invalid:
+  - |
+    while (true) {
+      try { return await call(); }
+      catch (e) { await sleep(1000); }
+    }
+---
+id: res-retry-012-py-unbounded-retry
+valid:
+  - |
+    for attempt in range(5):
+        try:
+            return call()
+        except TransientError:
+            time.sleep(backoff(attempt))
+  - |
+    while True:
+        try:
+            return call()
+        except TransientError:
+            attempt += 1
+            if attempt >= 5:
+                raise
+            time.sleep(backoff(attempt))
+invalid:
+  - |
+    while True:
+        try:
+            return call()
+        except Exception:
+            time.sleep(1)

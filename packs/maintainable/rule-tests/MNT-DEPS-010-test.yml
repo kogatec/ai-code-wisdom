@@ -1,0 +1,27 @@
+id: mnt-deps-010-ts-deprecated-api
+valid:
+  - const b = Buffer.from(text, "utf8");
+  - const head = name.slice(0, 3);
+  - const u = new URL(raw);
+invalid:
+  - const b = new Buffer(text);
+  - const head = name.substr(0, 3);
+  - const u = url.parse(raw);
+---
+id: mnt-deps-010-py-deprecated-api
+valid:
+  - now = datetime.now(timezone.utc)
+  - from importlib.metadata import version
+invalid:
+  - now = datetime.utcnow()
+  - now = datetime.datetime.utcnow()
+  - import pkg_resources
+  - from distutils.core import setup
+  - loop = asyncio.get_event_loop()
+---
+id: mnt-deps-010-py-typing-alias
+valid:
+  - from typing import Optional, Protocol
+invalid:
+  - from typing import List, Optional
+  - from typing import Dict

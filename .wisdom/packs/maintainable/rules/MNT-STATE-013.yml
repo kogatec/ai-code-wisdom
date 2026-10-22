@@ -1,0 +1,41 @@
+id: mnt-state-013-py-mutable-default
+language: Python
+severity: error
+message: 引数の既定値に、変更できるオブジェクト（[] / {} / set()）を使っています
+note: 既定値は呼び出しのたびに共有されます。既定値を None にして、関数の中で新しく作ってください。
+metadata: { principle: MNT-STATE-013 }
+rule:
+  any:
+    - kind: default_parameter
+    - kind: typed_default_parameter
+  has:
+    field: value
+    any:
+      - kind: list
+      - kind: dictionary
+      - kind: set
+      - regex: '^(list|dict|set)\(\)$'
+---
+id: mnt-state-013-py-global
+language: Python
+severity: warning
+message: global でモジュールの変数を書き換えています
+note: 状態はクラスや引数で受け渡してください。どこから書き換えられるか分からない変数は、不具合の原因を追えなくします。
+metadata: { principle: MNT-STATE-013 }
+rule:
+  kind: global_statement
+---
+id: mnt-state-013-ts-module-let
+language: TypeScript
+severity: info
+message: モジュールの最上位に、書き換えられる変数（let）があります
+note: モジュールの最上位の状態は、そのモジュールを使うすべての場所で共有されます。クラスや関数の引数で受け渡せないか検討してください。
+metadata: { principle: MNT-STATE-013 }
+rule:
+  kind: lexical_declaration
+  regex: '^let\b'
+  inside:
+    any:
+      - kind: program
+      - kind: export_statement
+        inside: { kind: program }

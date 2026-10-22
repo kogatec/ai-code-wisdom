@@ -1,0 +1,27 @@
+id: sim-param-003-ts-many-params
+language: TypeScript
+severity: warning
+message: 引数が5個以上あります
+note: 関係する引数を1つのオブジェクトにまとめ、名前付きで渡せるようにしてください。
+metadata: { principle: SIM-PARAM-003 }
+rule:
+  kind: formal_parameters
+  has: { nthChild: 5 }
+  not:
+    inside:
+      kind: method_definition
+      has: { field: name, regex: '^constructor$' }
+---
+id: sim-param-003-py-many-params
+language: Python
+severity: warning
+message: 引数が5個以上あります（self / cls を除く）
+note: 関係する引数を dataclass などにまとめるか、キーワード専用引数（*, の後ろ）にしてください。
+metadata: { principle: SIM-PARAM-003 }
+rule:
+  kind: parameters
+  any:
+    - has: { nthChild: 6 }
+    - all:
+        - has: { nthChild: 5 }
+        - not: { has: { nthChild: 1, regex: '^(self|cls)$' } }

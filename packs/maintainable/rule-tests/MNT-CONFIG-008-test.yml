@@ -1,0 +1,15 @@
+id: mnt-config-008-ts-hardcoded-endpoint
+valid:
+  - const api = process.env.API_BASE_URL;
+  - const dev = "http://localhost:3000";
+  - const schema = "https://json-schema.org/draft/2020-12/schema";
+invalid:
+  - const api = "https://api.payments-prod.internal/v1";
+  - const db = "10.0.3.17:5432";
+---
+id: mnt-config-008-py-hardcoded-endpoint
+valid:
+  - API_BASE = os.environ["API_BASE_URL"]
+  - DEV = "http://localhost:8000"
+invalid:
+  - API_BASE = "https://api.payments-prod.internal/v1"

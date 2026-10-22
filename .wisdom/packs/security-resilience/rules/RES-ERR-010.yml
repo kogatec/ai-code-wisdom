@@ -1,0 +1,54 @@
+id: res-err-010-ts-empty-catch
+language: TypeScript
+severity: error
+message: catch ブロックが空で、エラーを握りつぶしています
+note: ログに残す、呼び出し元へ投げ直す、利用者に知らせる、のどれかをしてください。無視が正しいなら、理由をコメントに書いてください。
+metadata: { principle: RES-ERR-010 }
+rule:
+  kind: statement_block
+  regex: '^\{\s*\}$'
+  inside: { kind: catch_clause, field: body }
+---
+id: res-err-010-ts-empty-promise-catch
+language: TypeScript
+severity: error
+message: .catch() で何もせずにエラーを捨てています
+note: ログに残す、呼び出し元へ伝える、のどちらかをしてください。無視が正しいなら、理由をコメントに書いてください。
+metadata: { principle: RES-ERR-010 }
+rule:
+  kind: call_expression
+  all:
+    - has: { field: function, regex: '\.catch$' }
+    - has:
+        field: arguments
+        has:
+          any:
+            - kind: arrow_function
+            - kind: function_expression
+          has:
+            field: body
+            regex: '^(\{\s*\}|null|undefined|void 0)$'
+---
+id: res-err-010-py-except-pass
+language: Python
+severity: error
+message: except で何もせず（pass）、エラーを握りつぶしています
+note: ログに残す、raise で投げ直す、利用者に知らせる、のどれかをしてください。無視が正しいなら、理由をコメントに書いてください。
+metadata: { principle: RES-ERR-010 }
+rule:
+  kind: except_clause
+  has:
+    kind: block
+    regex: '^(pass|\.\.\.)$'
+  not:
+    has: { kind: comment, stopBy: end }
+---
+id: res-err-010-py-bare-except
+language: Python
+severity: warning
+message: 例外の型を書かない except は、KeyboardInterrupt や SystemExit まで捕まえます
+note: 捕まえる例外の型を書いてください（広く捕まえるなら except Exception）。
+metadata: { principle: RES-ERR-010 }
+rule:
+  kind: except_clause
+  regex: '^except\s*:'

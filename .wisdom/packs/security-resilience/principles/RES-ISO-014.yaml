@@ -1,0 +1,28 @@
+id: RES-ISO-014
+version: 0.1.0
+title: 依存先が落ちたときの振る舞いを決め、影響を閉じ込める
+summary: 外部依存ごとに、落ちたときの振る舞い（縮退・代替・明確なエラー）を決める
+level: default
+styles: { security_resilience: 1.0 }
+applies_when:
+  languages: [typescript, python]
+  layers: [service, external_call]
+not_when: []
+rationale: >
+  必須でない機能（おすすめ表示など）の依存先が落ちただけで、ページ全体が表示できなくなることが多い。
+  落ちたときの振る舞いを先に決めておけば、影響をその機能だけに留められる。
+checks:
+  static: []   # どの依存が必須かは要件次第のため、機械では判定できない
+  review: >
+    新しい外部依存について、必須か任意かが決まっているか。
+    任意の依存が失敗したとき、縮退して処理を続けているか（Promise.allSettled など）。
+    必須の依存が失敗したとき、明確なエラーを返しているか。
+    失敗が続く依存への呼び出しを一時的に止める仕組み（サーキットブレーカー）が要るか
+  tests: 各外部依存をエラー・タイムアウトにしたとき、決めた振る舞い（縮退・エラー）になることを確かめる
+example:
+  bad: "const [user, recs] = await Promise.all([getUser(id), getRecs(id)])"
+  good: "const [user, recs] = await Promise.allSettled([...]); render(user, recs.status === 'fulfilled' ? recs.value : [])"
+tensions: [{ axis: abstraction, direction: more }]
+evidence: { standards: [], repos: [] }
+confidence: null
+validation: 未評価

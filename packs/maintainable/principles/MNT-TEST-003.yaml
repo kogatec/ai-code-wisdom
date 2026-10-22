@@ -1,0 +1,25 @@
+id: MNT-TEST-003
+version: 0.1.0
+title: 振る舞いの変更には、それを確かめるテストを付ける
+summary: 機能追加・バグ修正には、結果を assert で確かめるテストを必ず付ける
+level: default
+styles: { maintainable: 1.0, testing: 1.0 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when:
+  - 振る舞いを変えないリファクタリング（既存のテストが通ることで確かめる）
+rationale: >
+  テストのない振る舞いは、次の変更で壊れても誰も気づかない。
+  何も確かめないテストは、通っていても安心の根拠にならない。
+checks:
+  static: [mnt-test-003-ts-test-without-assertion, mnt-test-003-py-test-without-assertion]
+  external:
+    - { engine: diff-cover, rule: "変更した行のテストカバレッジ（例：80% 以上）" }
+  review: バグ修正に、そのバグを再現するテスト（修正前は失敗するもの）が付いているか
+  tests: 新しい振る舞いの正常系と、少なくとも1つの異常系を確かめる
+example:
+  bad: "it('adds tax', () => { withTax(100) })"
+  good: "it('adds tax', () => { expect(withTax(100)).toBe(110) })"
+tensions: []
+evidence: { tools: [diff-cover], repos: [] }
+confidence: null
+validation: 未評価

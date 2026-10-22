@@ -1,0 +1,17 @@
+id: sim-cond-006-ts-complex-condition
+valid:
+  - if (isLoggedIn && hasItems && !isBlocked) { checkout(); }
+  - const canCheckout = isLoggedIn && hasItems;
+invalid:
+  - if (user && user.active && cart.items.length > 0 && !user.blocked) { checkout(); }
+  - if ((a && b) || (c && d)) { go(); }
+---
+id: sim-cond-006-py-complex-condition
+valid:
+  - |
+    if is_logged_in and has_items and not is_blocked:
+        checkout()
+invalid:
+  - |
+    if user and user.active and cart.items and not user.blocked:
+        checkout()

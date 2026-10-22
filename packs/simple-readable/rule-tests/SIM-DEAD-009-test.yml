@@ -1,0 +1,40 @@
+id: sim-dead-009-ts-unreachable
+valid:
+  - |
+    function f(x) {
+      if (!x) return null;
+      return parse(x);
+    }
+  - |
+    function g() {
+      return helper();
+      function helper() { return 1; }
+    }
+invalid:
+  - |
+    function f(x) {
+      return parse(x);
+      log("parsed");
+    }
+  - |
+    for (const x of xs) {
+      continue;
+      use(x);
+    }
+---
+id: sim-dead-009-py-unreachable
+valid:
+  - |
+    def f(x):
+        if not x:
+            return None
+        return parse(x)
+invalid:
+  - |
+    def f(x):
+        return parse(x)
+        log("parsed")
+  - |
+    def g():
+        raise ValueError("x")
+        cleanup()

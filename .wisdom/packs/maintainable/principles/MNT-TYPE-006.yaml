@@ -1,0 +1,25 @@
+id: MNT-TYPE-006
+version: 0.1.0
+title: 境界の型を明示する
+summary: any を使わず、公開関数の引数と戻り値に型を書く
+level: default
+styles: { maintainable: 1.0, type_safety: 1.0 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when:
+  - 型定義のない外部ライブラリとの接点（unknown で受けて、すぐに絞り込む）
+rationale: >
+  型は、変更したときに影響を受ける場所を機械が教えてくれる仕組み。
+  any や型のない境界があると、その先の変更の影響を誰も検出できない。
+checks:
+  static: [mnt-type-006-ts-any, mnt-type-006-py-public-no-return-type]
+  external:
+    - { engine: tsc, rule: "strict: true" }
+    - { engine: mypy, rule: "--strict（または pyright の strict）" }
+  review: 型アサーション（as / cast）で、検証せずに型を決めつけていないか
+example:
+  bad: "function parse(input: any) { return input }"
+  good: "function parse(input: unknown): User { return UserSchema.parse(input) }"
+tensions: []
+evidence: { tools: ["@typescript-eslint/no-explicit-any", mypy], repos: [] }
+confidence: null
+validation: 未評価

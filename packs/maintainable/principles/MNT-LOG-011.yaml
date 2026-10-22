@@ -1,0 +1,23 @@
+id: MNT-LOG-011
+version: 0.1.0
+title: 運用中に原因を調べられるように記録する
+summary: 記録は構造化ロガーで行い、リクエストごとの ID と、判断に必要な文脈を付ける
+level: default
+styles: { maintainable: 1.0, security_resilience: 0.6 }
+applies_when: { languages: [typescript, python], layers: [api_handler, service, worker] }
+not_when:
+  - CLI の標準出力（利用者への表示）
+rationale: >
+  本番で起きた問題は、手元で再現できないことが多く、記録だけが手がかりになる。
+  構造化して ID でつなげば、1つのリクエストの流れを後から追える。
+checks:
+  static: [mnt-log-011-ts-console, mnt-log-011-py-print]
+  review: エラーの記録に、原因を調べるのに必要な文脈（対象の ID・入力の概要）があるか。秘密情報を含めていないか（SEC-LEAK-006）
+  tests: エラーが起きたとき、リクエスト ID 付きで記録されることを確かめる
+example:
+  bad: "console.log('failed', err)"
+  good: "logger.error({ err, orderId, requestId }, 'charge failed')"
+tensions: []
+evidence: { tools: [eslint:no-console, ruff:T201], repos: [] }
+confidence: null
+validation: 未評価

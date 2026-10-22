@@ -1,0 +1,27 @@
+id: RES-ASYNC-013
+version: 0.1.0
+title: 非同期処理を放置しない
+summary: Promise / Task は必ず待つか、失敗の処理を付ける
+level: default
+styles: { security_resilience: 0.8, maintainable: 0.6 }
+applies_when:
+  languages: [typescript, python]
+  layers: [any]
+not_when: []
+rationale: >
+  待たない Promise / Task の失敗は、誰にも処理されずに消えるか、プロセスを落とす。
+  処理の順序も保証されず、再現しにくい不具合になる。
+checks:
+  static: [res-async-013-ts-then-without-catch, res-async-013-py-orphan-task]
+  external:
+    - engine: eslint
+      rule: "@typescript-eslint/no-floating-promises"   # 型情報が必要。このパックでは未検証
+  review: バックグラウンド処理を始める場合、失敗の記録と、終了時の後始末があるか
+  tests: 非同期処理が失敗したとき、エラーが記録される（黙って消えない）ことを確かめる
+example:
+  bad: "sendEmail(user).then(() => log('sent'))"
+  good: "await sendEmail(user)"
+tensions: []
+evidence: { standards: [], repos: [] }
+confidence: null
+validation: 未評価

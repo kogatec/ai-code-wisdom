@@ -1,0 +1,27 @@
+id: SIM-ABS-010
+version: 0.1.0
+title: 抽象化は、必要が2回以上現れてから行う
+summary: 実装が1つしかないインターフェースや、使われていない拡張ポイントを作らない
+level: default
+styles: { simple_readable: 1.0, speed: 0.8 }
+applies_when: { languages: [typescript, python], layers: [any] }
+not_when:
+  - テストのために差し替えが必要な境界（外部 API・時刻・乱数など）
+  - 外部に公開するライブラリの API
+rationale: >
+  将来のための抽象化は、多くの場合その将来が来ないか、来ても想定と違う形で来る。
+  早すぎる抽象化は、読む量と変更の手間を増やすだけになる。
+checks:
+  static: []   # 「必要かどうか」は設計の文脈次第のため、機械では判定できない
+  review: >
+    実装が1つしかない interface / 抽象クラス / Factory を新しく作っていないか。
+    使われていない設定項目・引数・フックを「将来のため」に足していないか。
+    同じ処理が2〜3回現れる前に、共通化していないか
+  tests: なし
+example:
+  bad: "interface IUserRepository {...}; class UserRepositoryImpl implements IUserRepository {...}  // 実装は1つだけ"
+  good: "class UserRepository {...}  // 2つ目の実装が必要になってから interface を切り出す"
+tensions: [{ axis: abstraction, direction: less }]
+evidence: { tools: [], repos: [] }
+confidence: null
+validation: 未評価

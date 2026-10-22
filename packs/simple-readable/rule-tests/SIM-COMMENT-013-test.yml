@@ -1,0 +1,23 @@
+id: sim-comment-013-ts-commented-out-code
+valid:
+  - // 在庫がない場合は注文を受け付けない（返金処理が複雑になるため）
+  - // return early if the cart is empty
+  - // @ts-expect-error 型定義が古いため
+  - // eslint-disable-next-line no-console
+invalid:
+  - // console.log(order);
+  - // const total = sum(items);
+  - // return cache.get(key);
+  - // if (user.isAdmin) {
+---
+id: sim-comment-013-py-commented-out-code
+valid:
+  - "# 在庫がない場合は注文を受け付けない（返金処理が複雑になるため）"
+  - "# return the user if found"
+  - "# type: ignore[attr-defined]"
+  - "# noqa: E501"
+invalid:
+  - "# print(order)"
+  - "# total = sum(items)"
+  - "# import pdb"
+  - "# if user.is_admin:"

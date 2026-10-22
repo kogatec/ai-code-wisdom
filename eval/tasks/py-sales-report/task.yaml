@@ -1,0 +1,23 @@
+id: py-sales-report
+title: 売上 CSV の集計
+language: python
+profile:
+  primary: simple-readable
+  secondary:
+    - maintainable
+# 隠しテストの件数（通過率の分母。--dry-run で実際の件数と一致するか確かめる）
+test:
+  functional: 8
+  robustness: 3
+steps:
+  - |
+    売上の CSV を月ごとに集計する関数を作ってください。
+
+    - `report.py` に `monthly_totals(path)` を作ってください。`path` は CSV ファイルのパスです（`str` でも `pathlib.Path` でも渡せるようにします）。
+    - CSV は `data/sales.csv` と同じ形式です。1 行目がヘッダーで、列は `date,department,product,quantity,unit_price`。`date` は `2026-01-05` の形式、`quantity` と `unit_price` は整数、文字コードは UTF-8 です。
+    - 1 件の金額は `quantity × unit_price` です。月ごとの合計を、`{"2026-01": 合計金額, ...}` の辞書（キーは `"YYYY-MM"`、値は整数）で返してください。売上のない月は含めません。
+  - |
+    同じ CSV から、さらに 2 つの集計を作ってください。どちらも `report.py` に追加します。
+
+    - `department_totals(path)`：部署ごとの合計金額を、`{"営業1課": 合計金額, ...}` の辞書で返します。
+    - `large_transactions(path)`：1 件の金額（`quantity × unit_price`）が 100000 円以上の行を、CSV に出てくる順のリストで返します。各要素は `{"date": "2026-01-05", "department": "営業1課", "product": "ノートPC", "amount": 196000}` の形の辞書です。ちょうど 100000 円の行も含めます。
