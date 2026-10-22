@@ -3,6 +3,11 @@
   "version": "0.2.0",
   "private": true,
   "description": "ユーザーが選んだ設計スタイルを、AI が開発から保守まで守り続けるための原則パック・検査・Claude Code プラグイン",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kogatec/ai-code-wisdom.git"
+  },
   "type": "module",
   "bin": {
     "wisdom": "bin/wisdom"
