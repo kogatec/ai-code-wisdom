@@ -38,9 +38,9 @@ import { listFileStates } from "./core/session.ts";
 import { runHook } from "./hooks.ts";
 import { runMcpServer } from "./mcp.ts";
 
-const USAGE = `AI Code Wisdom（wisdom）：選んだ設計スタイルを、AI が開発から保守まで守り続けるための道具
+const USAGE = `Torus Code（torus）：選んだ設計スタイルを、AI が開発から保守まで守り続けるための道具
 
-使い方：wisdom <コマンド> [オプション]
+使い方：torus <コマンド> [オプション]
 
 設定
   init [--primary ID] [--secondary ID[:重み]]... [--phase production|prototype]
@@ -68,7 +68,7 @@ const USAGE = `AI Code Wisdom（wisdom）：選んだ設計スタイルを、AI 
 
 共通オプション
   --project <dir>       プロジェクトのディレクトリ（既定は現在のディレクトリ。init 以外は親へたどって探す）
-  --wisdom-dir <dir>    設定の置き場所を変える（指定時は --project をそのままルートにする）
+  --torus-dir <dir>    設定の置き場所を変える（指定時は --project をそのままルートにする）
 `;
 
 type Values = Record<string, any>;
@@ -81,7 +81,7 @@ process.stdout.on("error", (err: NodeJS.ErrnoException) => {
 
 const COMMON_OPTIONS = {
   project: { type: "string" },
-  "wisdom-dir": { type: "string" },
+  "torus-dir": { type: "string" },
 } as const;
 
 function parse(args: string[], options: Record<string, { type: "string" | "boolean"; multiple?: boolean }> = {}) {
@@ -109,13 +109,13 @@ function startDir(values: Values): string {
 /** 設定済みのプロジェクトの paths。見つからなければエラー */
 function configuredPaths(values: Values): ProjectPaths {
   const start = startDir(values);
-  if (values["wisdom-dir"]) {
-    const paths = projectPaths(start, path.resolve(values["wisdom-dir"]));
-    if (!fs.existsSync(paths.profile)) throw new Error("未設定です。wisdom init を実行してください");
+  if (values["torus-dir"]) {
+    const paths = projectPaths(start, path.resolve(values["torus-dir"]));
+    if (!fs.existsSync(paths.profile)) throw new Error("未設定です。torus init を実行してください");
     return paths;
   }
   const root = findProjectRoot(start);
-  if (!root) throw new Error("未設定です。wisdom init を実行してください");
+  if (!root) throw new Error("未設定です。torus init を実行してください");
   return projectPaths(root);
 }
 
@@ -193,7 +193,7 @@ async function cmdInit(args: string[]): Promise<number> {
     force: { type: "boolean" },
   });
   const root = startDir(values);
-  const paths = projectPaths(root, values["wisdom-dir"] ? path.resolve(values["wisdom-dir"]) : undefined);
+  const paths = projectPaths(root, values["torus-dir"] ? path.resolve(values["torus-dir"]) : undefined);
   let choice: StyleChoice;
   if (values.primary) {
     choice = {
@@ -206,7 +206,7 @@ async function cmdInit(args: string[]): Promise<number> {
     choice = await promptChoice();
     choice.review = oneOf(values.review, REVIEWS, "--review");
   } else {
-    process.stderr.write("wisdom: エラー：--primary で主スタイルを指定してください（例：wisdom init --primary security-resilience）\n\n" + USAGE);
+    process.stderr.write("torus: エラー：--primary で主スタイルを指定してください（例：torus init --primary security-resilience）\n\n" + USAGE);
     return 2;
   }
   const compiled = initProject(paths, choice, { force: values.force === true });
@@ -214,7 +214,7 @@ async function cmdInit(args: string[]): Promise<number> {
   for (const line of describeSetup(compiled)) out(line);
   out("作ったファイル：");
   const shown = (f: string) => relativeToRoot(paths.root, f) ?? f;
-  for (const f of [paths.profile, paths.lock, paths.decisions, path.join(paths.wisdomDir, ".gitignore")]) out(`  ${shown(f)}`);
+  for (const f of [paths.profile, paths.lock, paths.decisions, path.join(paths.torusDir, ".gitignore")]) out(`  ${shown(f)}`);
   for (const p of compiled.packs) out(`  ${shown(path.join(paths.packsDir, p.id))}/`);
   return 0;
 }
@@ -330,7 +330,7 @@ function cmdPrinciples(args: string[]): number {
 function cmdExplain(args: string[]): number {
   const { values, positionals } = parse(args);
   const id = positionals[0];
-  if (!id) throw new Error("原則の ID を指定してください（例：wisdom explain SEC-INJ-002）");
+  if (!id) throw new Error("原則の ID を指定してください（例：torus explain SEC-INJ-002）");
   let paths: ProjectPaths | null = null;
   try {
     paths = configuredPaths(values);
@@ -459,7 +459,7 @@ function cmdAudit(args: string[]): number {
     out(`- [${id}] ${byPrinciple[id]} 件（${sev}）`);
   }
   out();
-  out(`### 例外（wisdom-allow）${waived.length} 件`);
+  out(`### 例外（torus-allow）${waived.length} 件`);
   for (const w of waived) out(`- ${w.file}:${w.line} [${w.principle}] ${w.reason}`);
   if (invalid.length) {
     out();
@@ -501,7 +501,7 @@ function cmdUpdate(args: string[]): number {
     applyUpdate(paths, plans.map((p) => p.pack));
     out("更新しました。");
   } else {
-    out("適用するには wisdom update --yes を実行してください");
+    out("適用するには torus update --yes を実行してください");
   }
   return 0;
 }
@@ -560,7 +560,7 @@ function cmdReviewContext(args: string[]): number {
     candidates = latestSessionFiles(paths);
   }
   const files = [...new Set(candidates)].filter(
-    (f) => languageOf(f) && fs.existsSync(path.join(paths.root, f)) && !f.startsWith(".wisdom/"),
+    (f) => languageOf(f) && fs.existsSync(path.join(paths.root, f)) && !f.startsWith(".torus/"),
   );
   if (files.length === 0) {
     out("レビュー対象のファイルはありません（対応言語の変更が見つかりませんでした）");
@@ -670,7 +670,7 @@ async function main(argv: string[]): Promise<number> {
       runMcpServer();
       return -1;
     default:
-      throw new Error(`不明なコマンドです：${command}（wisdom help で使い方を確認できます）`);
+      throw new Error(`不明なコマンドです：${command}（torus help で使い方を確認できます）`);
   }
 }
 
@@ -678,6 +678,6 @@ try {
   const code = await main(process.argv.slice(2));
   if (code >= 0) process.exitCode = code;
 } catch (err) {
-  process.stderr.write(`wisdom: エラー：${(err as Error).message}\n`);
+  process.stderr.write(`torus: エラー：${(err as Error).message}\n`);
   process.exitCode = 2;
 }

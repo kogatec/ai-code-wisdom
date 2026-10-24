@@ -12,7 +12,7 @@ rationale: >
   後の人は理由を知らずに前提を壊すか、怖くて何も変えられなくなる。
 checks:
   static: [mnt-doc-014-ts-export-without-doc, mnt-doc-014-py-public-without-docstring]
-  review: 設計を変える判断（ライブラリの選定・データ構造の変更・トレードオフ）について、理由が .wisdom/decisions.md や ADR に書かれているか
+  review: 設計を変える判断（ライブラリの選定・データ構造の変更・トレードオフ）について、理由が .torus/decisions.md や ADR に書かれているか
 example:
   bad: "export function withTax(price) {...}  // 単位も丸め方も分からない"
   good: "/** 税込価格（円・切り捨て）を返す。price は税抜きの円 */ export function withTax(price) {...}"

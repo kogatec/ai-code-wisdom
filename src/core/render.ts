@@ -46,7 +46,7 @@ export function renderSessionContext(compiled: Compiled): string {
   const secondary = compiled.packs.filter((p) => p.role === "secondary");
   const secondaryText = secondary.length ? secondary.map((p) => `${p.name}（重み ${p.weight}）`).join("、") : "なし";
   const lines: string[] = [
-    "# AI Code Wisdom：このプロジェクトの設計方針",
+    "# Torus Code：このプロジェクトの設計方針",
     `主スタイル：${primary?.name ?? compiled.profile.primary} ／ 副スタイル：${secondaryText} ／ 段階：${PHASE_LABEL[compiled.profile.phase]}`,
     "",
   ];
@@ -61,7 +61,7 @@ export function renderSessionContext(compiled: Compiled): string {
     lines.push("## 優先して守る原則（上ほど優先）");
     for (const p of others.slice(0, 12)) lines.push(`- [${p.id}] ${p.summary}`);
     if (others.length > 12) {
-      lines.push(`- ほか ${others.length - 12} 件（wisdom_principles ツールか \`wisdom principles\` で確認）`);
+      lines.push(`- ほか ${others.length - 12} 件（torus_principles ツールか \`torus principles\` で確認）`);
     }
     lines.push("");
   }
@@ -77,8 +77,8 @@ export function renderSessionContext(compiled: Compiled): string {
   lines.push(
     "## 進め方",
     "- ファイルを書くたびに自動で検査される。[必須] の違反は直すまで先に進めない",
-    "- 例外が本当に必要な箇所だけ、その行か直前の行に `wisdom-allow <ID>: 理由` を書き、ユーザーに伝える",
-    "- 設計上の判断（原則の衝突・構造の変更）は .wisdom/decisions.md に1行で記録する",
+    "- 例外が本当に必要な箇所だけ、その行か直前の行に `torus-allow <ID>: 理由` を書き、ユーザーに伝える",
+    "- 設計上の判断（原則の衝突・構造の変更）は .torus/decisions.md に1行で記録する",
     "- 作業の最後に「適用した原則／検査の結果／未解決」を短く報告する",
   );
   return lines.join("\n");
@@ -110,7 +110,7 @@ export function renderFileContext(compiled: Compiled, relFile: string): string |
     .slice(0, 5);
   if (picked.length === 0) return null;
   return [
-    `[AI Code Wisdom] ${relFile} を書くときに確かめること（機械では検査できない部分）：`,
+    `[Torus Code] ${relFile} を書くときに確かめること（機械では検査できない部分）：`,
     ...picked.map((p) => `- [${p.id}] ${oneLine(p.checks.review!, 160)}`),
   ].join("\n");
 }
@@ -144,13 +144,13 @@ export function renderFindingsFeedback(
   let blockingText: string | null = null;
   if (blocking.length) {
     const ids = [...new Set(blocking.map((f) => f.principle))];
-    const lines = [`[AI Code Wisdom] ${file} に必須原則の違反が入りました。直してから先に進んでください。`];
+    const lines = [`[Torus Code] ${file} に必須原則の違反が入りました。直してから先に進んでください。`];
     for (const f of blocking) {
       lines.push(findingLine(f, true));
       if (f.note) lines.push(`  → ${f.note}`);
     }
     lines.push(
-      `本当に例外が必要なら、その行に \`wisdom-allow ${ids.length === 1 ? ids[0] : "<原則ID>"}: 理由\` を書き、ユーザーに説明してください。`,
+      `本当に例外が必要なら、その行に \`torus-allow ${ids.length === 1 ? ids[0] : "<原則ID>"}: 理由\` を書き、ユーザーに説明してください。`,
     );
     blockingText = lines.join("\n");
   }
@@ -159,7 +159,7 @@ export function renderFindingsFeedback(
   if (rest.length) {
     const high = rest.filter((f) => f.severity === "error" || f.severity === "warning");
     const low = rest.filter((f) => f.severity !== "error" && f.severity !== "warning");
-    const lines = [`[AI Code Wisdom] ${file} の検査結果（止めはしませんが、直せるなら直してください）：`];
+    const lines = [`[Torus Code] ${file} の検査結果（止めはしませんが、直せるなら直してください）：`];
     for (const f of high) {
       lines.push(findingLine(f, false));
       if (f.note) lines.push(`  → ${f.note}`);

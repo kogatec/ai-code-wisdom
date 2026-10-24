@@ -1,4 +1,4 @@
-# AI Code Wisdom 設計書 v0.1
+# Torus Code 設計書 v0.1
 
 ---
 
@@ -7,7 +7,7 @@
 1. **製品を2つに分ける。** 「原則をつくる側」（抽出・検証。オフライン）と「原則を守らせる側」（ユーザーの手元で動く）。MVPは**守らせる側＋手作りの原則**で作り、抽出エンジンは後にする。
 2. **中心の単位は「原則」。** 原則は文章ではなく、適用条件・検査方法・根拠を持つデータとして扱う。**検査方法を持たない原則は採用しない。**
 3. **方針はプロンプトではなく、毎回動く仕組みで守らせる。** hooks・静的検査・レビュー役のサブエージェント・CI の5層で守らせる。
-4. **設定はリポジトリ内のファイル（`.wisdom/`）に置く。** 原則のバージョンは lock で固定し、パックが更新されても勝手に挙動が変わらないようにする。
+4. **設定はリポジトリ内のファイル（`.torus/`）に置く。** 原則のバージョンは lock で固定し、パックが更新されても勝手に挙動が変わらないようにする。
 5. **評価の仕組みを最初に作る。** 効果を測れないと、どの原則が効いているかを判断できない。
 6. **最初の対応環境は Claude Code。** hooks・サブエージェント・MCP・スキルがそろっているため。他の環境には機能を減らして対応する。CI での検査は、どの環境を使っていても効く。
 7. **抽出の材料は「コードの見た目」より「変更履歴とレビュー」。** コードから分かるのは「何を書いたか」まで。「なぜそう書くか」はレビューコメントやバグ修正に残っている。
@@ -25,7 +25,7 @@
 └────────────────────────────────────────────────────────────────────────┘
                                ↓ 配布（npm / git タグ、ハッシュ付き）
 ┌───────────── 原則を守らせる側（ユーザーの手元・ローカル完結） ─────────┐
-│ wisdom core : プロファイル解決 / 衝突解決 / ルール生成 / 検査実行       │
+│ torus core : プロファイル解決 / 衝突解決 / ルール生成 / 検査実行       │
 │   ├ CLI        : init / style / check / audit / explain / update        │
 │   ├ MCP server : 原則の取得・差分の検査・判断の記録                     │
 │   └ adapters   : Claude Code plugin / Cursor / AGENTS.md / CI           │
@@ -105,16 +105,16 @@ packs/security-resilience/
 ### ユーザーのプロジェクト側
 
 ```
-.wisdom/
+.torus/
   profile.yaml     # 選んだスタイルと優先度
   lock.json        # 使う原則のID・バージョン・ハッシュを固定
   decisions.md     # トレードオフの判断記録（1行ずつ）
   ledger.jsonl     # 作業ごとに適用した原則と検査結果（ローカルのみ）
-CLAUDE.md / AGENTS.md   # wisdom が管理する区画をマーカーで囲んで書き込む
+CLAUDE.md / AGENTS.md   # torus が管理する区画をマーカーで囲んで書き込む
 ```
 
 ```yaml
-# .wisdom/profile.yaml
+# .torus/profile.yaml
 packs:
   security-resilience: ^1.0
   maintainable: ^1.0
@@ -129,7 +129,7 @@ overrides:
     "scripts/**": { primary: simple-readable }   # ディレクトリごとに切り替え
 ```
 
-パックの更新は `wisdom update` で行う。原則の差分を見せてから lock を更新し、勝手には上がらない。
+パックの更新は `torus update` で行う。原則の差分を見せてから lock を更新し、勝手には上がらない。
 
 ### 衝突の解決順
 
@@ -147,7 +147,7 @@ overrides:
 
 1. AI は止まり、該当する原則の ID と理由を示す
 2. 最小限の安全な代替案を出す（例：スキーマ1行で済む書き方）
-3. それでも必要な場合は、**その箇所だけ**に、理由付きの例外コメントを書く（`// wisdom-allow SEC-IV-001: 理由`）。`wisdom audit` は例外を一覧に出す
+3. それでも必要な場合は、**その箇所だけ**に、理由付きの例外コメントを書く（`// torus-allow SEC-IV-001: 理由`）。`torus audit` は例外を一覧に出す
 
 → 元の指示書からの変更提案：mandatory は設定ファイルでは外せないが、理由を書いた箇所単位の例外は認める（リンターの disable コメントと同じ考え方）。完全に禁止すると、ユーザーがプラグインごと外してしまうため。
 
@@ -161,7 +161,7 @@ overrides:
 | **L1 その時に必要な原則** | 依頼を受けた時・ファイルを書く直前 | 作業の種類（新規・機能追加・バグ修正・リファクタ）とファイルパスから、該当する原則だけを渡す | 小 | 全部入れるとコンテキストがあふれる |
 | **L2 機械的な検査** | ファイルを書いた直後 | 変更ファイルに静的ルールをかけ、違反を原則 ID 付きで AI に返す。mandatory 違反は直るまで先へ進ませない | 速い（数百ms以内が目標） | 書いた直後の崩れ |
 | **L3 意味のレビュー** | 作業を終える時 | レビュー役のサブエージェントが差分を、機械では判定できない原則の rubric で確認する。差分が大きい時や mandatory が関わる時だけ動かす | 大きい → 条件付きで動かす | 機械では見えない設計の崩れ |
-| **L4 監査・CI** | `wisdom audit`・pre-commit・CI | リポジトリ全体の違反数と複雑度の推移を見る | AI 環境に依存しない | 長期間でのずれ |
+| **L4 監査・CI** | `torus audit`・pre-commit・CI | リポジトリ全体の違反数と複雑度の推移を見る | AI 環境に依存しない | 長期間でのずれ |
 
 L2 と L4 は決まった手順で動き、AI の記憶に頼らない。「開発が進むと方針が崩れる」問題に対する本命はこの2層。
 
@@ -172,18 +172,18 @@ L2 と L4 は決まった手順で動き、AI の記憶に頼らない。「開�
 ## 5. Claude Code プラグインの構成
 
 ```
-wisdom-plugin/
-  .claude-plugin/plugin.json    # mcpServers に wisdom MCP サーバーを書く
+torus-plugin/
+  .claude-plugin/plugin.json    # mcpServers に torus MCP サーバーを書く
   skills/
-    wisdom-apply/SKILL.md       # 作業の種類ごとに原則を引いて従う手順
-    wisdom-select/SKILL.md      # スタイル選択の対話
+    torus-apply/SKILL.md       # 作業の種類ごとに原則を引いて従う手順
+    torus-select/SKILL.md      # スタイル選択の対話
   commands/
-    wisdom-init.md              # 初期設定とスタイル選択
-    wisdom-style.md             # スタイルの確認・変更
-    wisdom-audit.md             # 全体の監査
-    wisdom-explain.md           # 原則の説明と根拠
+    torus-init.md              # 初期設定とスタイル選択
+    torus-style.md             # スタイルの確認・変更
+    torus-audit.md             # 全体の監査
+    torus-explain.md           # 原則の説明と根拠
   agents/
-    wisdom-reviewer.md          # L3 のレビュー役
+    torus-reviewer.md          # L3 のレビュー役
   hooks/hooks.json              # SessionStart / UserPromptSubmit / PreToolUse / PostToolUse / Stop
 ```
 
@@ -197,7 +197,7 @@ wisdom-plugin/
 
 MCP ツール：`get_principles(task, paths)`、`check(paths | diff)`、`explain(id)`、`record_decision(text, principle_ids)`、`profile()`
 
-スタイル選択の画面：MVP では `/wisdom-init` の対話と、`wisdom init` のターミナル選択で作る。各スタイルには、重視する価値・主な原則・向くプロジェクト・トレードオフ・根拠の数・検証状況を表示する。Web 画面は後で作る。
+スタイル選択の画面：MVP では `/torus-init` の対話と、`torus init` のターミナル選択で作る。各スタイルには、重視する価値・主な原則・向くプロジェクト・トレードオフ・根拠の数・検証状況を表示する。Web 画面は後で作る。
 
 ※ hooks の発火タイミングや、AI への返し方（終了コードなど）の細かい仕様は実装時に公式ドキュメントで確認する。
 
@@ -228,7 +228,7 @@ pre-commit と CI はどの環境でも同じように効く最後の砦。ア�
 ### リポジトリ構成（モノレポ）
 
 ```
-ai-code-wisdom/
+torus-code/
   packages/
     core/          # スキーマ・プロファイル解決・衝突解決・ルール生成
     checks/        # ast-grep / Semgrep の実行と違反→原則IDの対応付け

@@ -13,7 +13,7 @@ CONTENT = "こんにちは、保存するファイルです。\n".encode("utf-8"
 
 class StoreTestCase(unittest.TestCase):
     def setUp(self):
-        self.root = Path(tempfile.mkdtemp(prefix="wisdom-store-"))
+        self.root = Path(tempfile.mkdtemp(prefix="torus-store-"))
         self.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
         self.upload_dir = self.root / "uploads"
         patcher = mock.patch.object(store, "UPLOAD_DIR", self.upload_dir)

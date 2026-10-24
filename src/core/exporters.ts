@@ -5,10 +5,10 @@ import { PLUGIN_ROOT, relativeToRoot, writeFileAtomic, type ProjectPaths } from 
 import { renderSessionContext } from "./render.ts";
 import type { Compiled } from "./resolve.ts";
 
-const BEGIN = "<!-- ai-code-wisdom:begin -->";
-const END = "<!-- ai-code-wisdom:end -->";
+const BEGIN = "<!-- torus-code:begin -->";
+const END = "<!-- torus-code:end -->";
 const AUTO_CHECK_LINE = "- ファイルを書くたびに自動で検査される。[必須] の違反は直すまで先に進めない";
-const MANUAL_CHECK_LINE = "- ファイルを書いたら `wisdom check --changed` を実行し、[必須] の違反を直す";
+const MANUAL_CHECK_LINE = "- ファイルを書いたら `torus check --changed` を実行し、[必須] の違反を直す";
 
 /** フックのない環境向けの文章（自動検査の代わりに、自分で検査コマンドを実行させる） */
 function renderPortableContext(compiled: Compiled): string {
@@ -34,8 +34,8 @@ export function exportAgentsMd(paths: ProjectPaths, compiled: Compiled): string 
 }
 
 export function exportCursorRules(paths: ProjectPaths, compiled: Compiled): string {
-  const file = path.join(paths.root, ".cursor", "rules", "ai-code-wisdom.mdc");
-  const header = "---\ndescription: AI Code Wisdom の設計方針\nalwaysApply: true\n---\n";
+  const file = path.join(paths.root, ".cursor", "rules", "torus-code.mdc");
+  const header = "---\ndescription: Torus Code の設計方針\nalwaysApply: true\n---\n";
   writeFileAtomic(file, header + renderPortableContext(compiled) + "\n");
   return file;
 }
@@ -55,14 +55,14 @@ function hookPathArg(topLevel: string, target: string): string {
   return `"$(git rev-parse --show-toplevel)"${rel ? `/${shellQuote(rel)}` : ""}`;
 }
 
-/** 設定がリポジトリのサブディレクトリや既定以外の場所（--wisdom-dir）にあっても、そこを検査する引数 */
+/** 設定がリポジトリのサブディレクトリや既定以外の場所（--torus-dir）にあっても、そこを検査する引数 */
 function hookCheckArgs(paths: ProjectPaths, topLevel: string): string {
   const args = [`--project ${hookPathArg(topLevel, paths.root)}`];
-  if (paths.wisdomDir !== path.join(paths.root, ".wisdom")) args.push(`--wisdom-dir ${hookPathArg(topLevel, paths.wisdomDir)}`);
+  if (paths.torusDir !== path.join(paths.root, ".torus")) args.push(`--torus-dir ${hookPathArg(topLevel, paths.torusDir)}`);
   return args.join(" ");
 }
 
-/** 必須原則の違反があるコミットを止める pre-commit フックを書く。AI Code Wisdom が作ったものでなければ上書きしない */
+/** 必須原則の違反があるコミットを止める pre-commit フックを書く。Torus Code が作ったものでなければ上書きしない */
 export function exportGitHook(paths: ProjectPaths): string {
   const gitPath = git(paths.root, ["rev-parse", "--git-path", "hooks/pre-commit"]);
   const topLevel = git(paths.root, ["rev-parse", "--show-toplevel"]);
@@ -70,17 +70,17 @@ export function exportGitHook(paths: ProjectPaths): string {
     throw new Error("git リポジトリではないため、pre-commit フックを作れません");
   }
   const file = path.resolve(paths.root, gitPath.stdout.trim());
-  if (fs.existsSync(file) && !fs.readFileSync(file, "utf8").includes("ai-code-wisdom")) {
-    throw new Error(`${file} が既にあります（AI Code Wisdom が作ったものではないため、上書きしません）`);
+  if (fs.existsSync(file) && !fs.readFileSync(file, "utf8").includes("torus-code")) {
+    throw new Error(`${file} が既にあります（Torus Code が作ったものではないため、上書きしません）`);
   }
   const script = [
     "#!/bin/sh",
-    "# ai-code-wisdom: コミット前に必須原則の違反を検査する",
-    `${shellQuote(path.join(PLUGIN_ROOT, "bin", "wisdom"))} check ${hookCheckArgs(paths, topLevel.stdout.trim())} --diff HEAD --fail-on blocking`,
+    "# torus-code: コミット前に必須原則の違反を検査する",
+    `${shellQuote(path.join(PLUGIN_ROOT, "bin", "torus"))} check ${hookCheckArgs(paths, topLevel.stdout.trim())} --diff HEAD --fail-on blocking`,
     "status=$?",
     "# 2 は検査そのものを実行できなかったとき（設定のあるディレクトリを移した・消したなど）",
     'if [ "$status" -eq 2 ]; then',
-    '  echo "ai-code-wisdom: 検査を実行できませんでした。設定の場所を変えた場合は wisdom export git-hook をやり直してください" >&2',
+    '  echo "torus-code: 検査を実行できませんでした。設定の場所を変えた場合は torus export git-hook をやり直してください" >&2',
     "fi",
     'exit "$status"',
     "",

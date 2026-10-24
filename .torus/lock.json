@@ -1,17 +1,17 @@
 {
-  "generated_by": "ai-code-wisdom 0.2.0",
+  "generated_by": "torus-code 0.3.0",
   "packs": {
     "maintainable": {
-      "version": "0.1.1",
-      "hash": "cf6dcf47be985a47"
+      "version": "0.1.2",
+      "hash": "66aa995499619bcf"
     },
     "security-resilience": {
-      "version": "0.1.1",
-      "hash": "43fdde0de56dafbf"
+      "version": "0.1.2",
+      "hash": "db65571be573b4d6"
     },
     "simple-readable": {
-      "version": "0.1.0",
-      "hash": "a0cc93c2598c057d"
+      "version": "0.1.1",
+      "hash": "9722270e886617f0"
     }
   },
   "principles": {

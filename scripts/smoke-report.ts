@@ -20,18 +20,18 @@ for (const e of hookEvents) {
 }
 const init = events.find((e) => e.type === "system" && e.subtype === "init");
 const result = events.find((e) => e.type === "result");
-const mentionsL0 = lines.some((l) => l.includes("AI Code Wisdom"));
+const mentionsL0 = lines.some((l) => l.includes("Torus Code"));
 
 console.log("plugins:", JSON.stringify(init?.plugins ?? null));
 console.log("mcp servers:", JSON.stringify((init?.mcp_servers ?? []).map((s: any) => `${s.name}:${s.status}`)));
 console.log("hook events seen:", [...hookNames].join(", ") || "(none)", `(${hookEvents.length} lines mention hooks)`);
-console.log("transcript mentions 'AI Code Wisdom':", mentionsL0);
+console.log("transcript mentions 'Torus Code':", mentionsL0);
 
-const ledgerFile = path.join(dir, ".wisdom", "ledger.jsonl");
+const ledgerFile = path.join(dir, ".torus", "ledger.jsonl");
 const ledger = fs.existsSync(ledgerFile) ? fs.readFileSync(ledgerFile, "utf8").trim().split("\n").filter(Boolean) : [];
 console.log("ledger lines:", ledger.length);
 for (const l of ledger.slice(0, 8)) console.log("  ", l.slice(0, 220));
-const errLog = path.join(dir, ".wisdom", "cache", "hook-errors.log");
+const errLog = path.join(dir, ".torus", "cache", "hook-errors.log");
 console.log("hook-errors.log:", fs.existsSync(errLog) ? fs.readFileSync(errLog, "utf8").slice(0, 800) : "(none)");
 
 if (result) {

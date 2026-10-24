@@ -1,5 +1,5 @@
 id: simple-readable
-version: 0.1.0
+version: 0.1.1
 name: シンプル・可読性重視型
 description: 初めて読む人が、上から順に読むだけで理解できるコードを書く
 values: [短い関数, 浅い入れ子, 意味の分かる名前, 素直な書き方, 不要な抽象化をしない]
@@ -16,7 +16,7 @@ languages: [typescript, python]
 enforcement:
   block: なし（mandatory の原則を含まないため）
   warn: すべての違反を AI に知らせる。severity が info のものは、作業の報告にまとめて載せるだけにする
-  allow_inline: '理由を書いたコメント（wisdom-allow <原則ID>: 理由）がある箇所は、例外として監査の一覧に載せる'
+  allow_inline: '理由を書いたコメント（torus-allow <原則ID>: 理由）がある箇所は、例外として監査の一覧に載せる'
 
 # 静的検査の対象外にするパス（テストは読みやすさの基準が異なるため）
 exclude_paths: ["**/*.test.ts", "**/*.spec.ts", "**/tests/**", "**/test_*.py", "**/*_test.py"]

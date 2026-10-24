@@ -30,13 +30,13 @@ test("session-start：L0 を additionalContext で返す", () => {
   assert.equal(r.status, 0);
   const out = json(r);
   assert.equal(out.hookSpecificOutput.hookEventName, "SessionStart");
-  assert.ok(out.hookSpecificOutput.additionalContext.startsWith("# AI Code Wisdom：このプロジェクトの設計方針"));
+  assert.ok(out.hookSpecificOutput.additionalContext.startsWith("# Torus Code：このプロジェクトの設計方針"));
   assert.equal(r.stdout.trim().split("\n").length, 1, "出力は1行");
 });
 
 test("session-start：lock と中身が食い違っていれば注意を添える", () => {
   const { root } = setupProject();
-  fs.appendFileSync(path.join(root, ".wisdom", "packs", "maintainable", "pack.yaml"), "\n# 手で編集\n");
+  fs.appendFileSync(path.join(root, ".torus", "packs", "maintainable", "pack.yaml"), "\n# 手で編集\n");
   const out = json(runHookProc("session-start", { session_id: "s1" }, root));
   assert.match(out.hookSpecificOutput.additionalContext, /\n注意：maintainable: lock\.json の記録から中身が変わっています/);
 });
@@ -60,12 +60,12 @@ test("未設定のコードのフォルダ：最初の依頼でだけ初回設�
   assert.equal(first.status, 0);
   const out = json(first);
   assert.equal(out.hookSpecificOutput.hookEventName, "UserPromptSubmit");
-  assert.ok(out.hookSpecificOutput.additionalContext.includes("ai-code-wisdom:init"));
+  assert.ok(out.hookSpecificOutput.additionalContext.includes("torus-code:init"));
 
   // 断った場合も含め、同じプロジェクトでは二度と聞かない（別のセッションでも）
   assert.equal(runHookProc("user-prompt-submit", { session_id: "s1", prompt: "次の依頼" }, dir, env).stdout, "");
   assert.equal(runHookProc("user-prompt-submit", { session_id: "s2", prompt: "別のセッション" }, dir, env).stdout, "");
-  assert.ok(!fs.existsSync(path.join(dir, ".wisdom")), "プロジェクトには何も書かない");
+  assert.ok(!fs.existsSync(path.join(dir, ".torus")), "プロジェクトには何も書かない");
 });
 
 test("user-prompt-submit：依頼の種類に合わせた手順を返す", () => {
@@ -110,10 +110,10 @@ test("Write で SQL の埋め込みを書くと block する", () => {
   assert.equal(post.status, 0);
   const out = json(post);
   assert.equal(out.decision, "block");
-  assert.ok(out.reason.startsWith("[AI Code Wisdom] src/repo.ts に必須原則の違反が入りました。直してから先に進んでください。"));
+  assert.ok(out.reason.startsWith("[Torus Code] src/repo.ts に必須原則の違反が入りました。直してから先に進んでください。"));
   assert.ok(out.reason.includes("- L2 [SEC-INJ-002] SQL をテンプレート文字列への埋め込みで組み立てています"));
-  assert.ok(out.reason.includes("`wisdom-allow SEC-INJ-002: 理由`"));
-  const events = readLedger({ ledger: path.join(root, ".wisdom", "ledger.jsonl") } as never);
+  assert.ok(out.reason.includes("`torus-allow SEC-INJ-002: 理由`"));
+  const events = readLedger({ ledger: path.join(root, ".torus", "ledger.jsonl") } as never);
   const edit = events.find((e) => e.event === "edit") as any;
   assert.equal(edit.file, "src/repo.ts");
   assert.equal(edit.new[0].principle, "SEC-INJ-002");
@@ -194,12 +194,12 @@ test("同じ違反を3回止めたら、4回目は止めない", () => {
   }
 });
 
-test("wisdom-allow に理由がないと block し、理由が必要だと伝える", () => {
+test("torus-allow に理由がないと block し、理由が必要だと伝える", () => {
   const { root } = setupProject();
-  const code = "export function f(db: Db, id: string) {\n  // wisdom-allow SEC-INJ-002\n  return db.query(`SELECT * FROM t WHERE id = ${id}`);\n}\n";
+  const code = "export function f(db: Db, id: string) {\n  // torus-allow SEC-INJ-002\n  return db.query(`SELECT * FROM t WHERE id = ${id}`);\n}\n";
   const out = json(writeFile(root, "s1", "src/n.ts", code).post);
   assert.equal(out.decision, "block");
-  assert.ok(out.reason.includes("wisdom-allow には理由が必要です"));
+  assert.ok(out.reason.includes("torus-allow には理由が必要です"));
   const ok = writeFile(root, "s1", "src/n.ts", code.replace("SEC-INJ-002", "SEC-INJ-002: 固定値のみ")).post;
   assert.ok(!isBlock(ok));
 });
@@ -210,12 +210,12 @@ test("stop：残った必須違反で block し、stop_hook_active なら block 
   const stop = runHookProc("stop", { session_id: "s1", stop_hook_active: false }, root);
   const out = json(stop);
   assert.equal(out.decision, "block");
-  assert.ok(out.reason.startsWith("[AI Code Wisdom] 終了する前に、この作業で入った必須原則の違反を直してください：\n- src/repo.ts:L2 [SEC-INJ-002]"));
+  assert.ok(out.reason.startsWith("[Torus Code] 終了する前に、この作業で入った必須原則の違反を直してください：\n- src/repo.ts:L2 [SEC-INJ-002]"));
   assert.equal(runHookProc("stop", { session_id: "s1", stop_hook_active: true }, root).stdout, "");
   // 直せば止まらず、ledger に stop が残る
   writeFile(root, "s1", "src/repo.ts", CLEAN_CODE);
   assert.equal(runHookProc("stop", { session_id: "s1" }, root).stdout, "");
-  const ledger = fs.readFileSync(path.join(root, ".wisdom", "ledger.jsonl"), "utf8").trim().split("\n").map((l) => JSON.parse(l));
+  const ledger = fs.readFileSync(path.join(root, ".torus", "ledger.jsonl"), "utf8").trim().split("\n").map((l) => JSON.parse(l));
   const stopEvent = ledger.find((e) => e.event === "stop");
   assert.deepEqual(stopEvent.files, ["src/repo.ts"]);
   assert.equal(stopEvent.session, "s1");
@@ -244,7 +244,7 @@ test("stop：変更が120行以上ならレビュー依頼が1回だけ出る", 
   const first = json(runHookProc("stop", { session_id: "s1" }, root));
   assert.equal(first.decision, "block");
   assert.ok(first.reason.includes("この作業では 130 行を変更しました"));
-  assert.ok(first.reason.includes('subagent_type "ai-code-wisdom:wisdom-reviewer"'));
+  assert.ok(first.reason.includes('subagent_type "torus-code:torus-reviewer"'));
   assert.equal(runHookProc("stop", { session_id: "s1" }, root).stdout, "");
 });
 
@@ -265,15 +265,15 @@ test("stop：変更が少なければレビューを頼まない。review: off �
 
 test("設定を読めないとき：session-start だけが、自動検査が止まっていることと理由を知らせる。どのフックも 0 で終わり、ログに残す", () => {
   const { root } = setupProject();
-  fs.writeFileSync(path.join(root, ".wisdom", "profile.yaml"), "primary: [\n");
+  fs.writeFileSync(path.join(root, ".torus", "profile.yaml"), "primary: [\n");
   const start = runHookProc("session-start", { session_id: "s1" }, root);
   assert.equal(start.status, 0);
   const out = json(start);
   assert.equal(out.hookSpecificOutput.hookEventName, "SessionStart");
   const text: string = out.hookSpecificOutput.additionalContext;
-  assert.ok(text.startsWith("[AI Code Wisdom] 設定を読めないため、このセッションでは自動検査が止まっています。"), text);
+  assert.ok(text.startsWith("[Torus Code] 設定を読めないため、このセッションでは自動検査が止まっています。"), text);
   assert.match(text, /\n理由：\S/);
-  assert.ok(text.includes("wisdom status"), text);
+  assert.ok(text.includes("torus status"), text);
   assert.equal(start.stdout.trim().split("\n").length, 1, "出力は1行");
 
   // 依頼や編集のたびには繰り返さない
@@ -283,13 +283,13 @@ test("設定を読めないとき：session-start だけが、自動検査が止
     assert.equal(r.status, 0, event);
     assert.equal(r.stdout, "", event);
   }
-  const log = fs.readFileSync(path.join(root, ".wisdom", "cache", "hook-errors.log"), "utf8");
+  const log = fs.readFileSync(path.join(root, ".torus", "cache", "hook-errors.log"), "utf8");
   assert.ok(log.includes("session-start"));
 });
 
 test("設定を読めないとき：手で編集した profile.yaml の副スタイルの重複も、理由として知らせる", () => {
   const { root } = setupProject();
-  const file = path.join(root, ".wisdom", "profile.yaml");
+  const file = path.join(root, ".torus", "profile.yaml");
   const profile = parseProfile(fs.readFileSync(file, "utf8"));
   writeProfile(file, { ...profile, secondary: [...profile.secondary, ...profile.secondary] });
   const text: string = json(runHookProc("session-start", { session_id: "s1" }, root)).hookSpecificOutput.additionalContext;
@@ -299,9 +299,9 @@ test("設定を読めないとき：手で編集した profile.yaml の副スタ
 
 test("session-start：lock.json が壊れていても L0 を返し、注意を添える", () => {
   const { root } = setupProject();
-  fs.writeFileSync(path.join(root, ".wisdom", "lock.json"), "{");
+  fs.writeFileSync(path.join(root, ".torus", "lock.json"), "{");
   const text: string = json(runHookProc("session-start", { session_id: "s1" }, root)).hookSpecificOutput.additionalContext;
-  assert.ok(text.startsWith("# AI Code Wisdom：このプロジェクトの設計方針"), text);
+  assert.ok(text.startsWith("# Torus Code：このプロジェクトの設計方針"), text);
   assert.match(text, /\n注意：lock\.json を読めません/);
 });
 

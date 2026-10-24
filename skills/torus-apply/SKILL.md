@@ -1,16 +1,16 @@
 ---
-name: wisdom-apply
-description: .wisdom/profile.yaml があるプロジェクトで、コードを書く・直す・整理するときに使う。選ばれた設計スタイルの原則に沿って実装し、フックの指摘への対応、例外の書き方、最後の報告の形を示す。
+name: torus-apply
+description: .torus/profile.yaml があるプロジェクトで、コードを書く・直す・整理するときに使う。選ばれた設計スタイルの原則に沿って実装し、フックの指摘への対応、例外の書き方、最後の報告の形を示す。
 ---
 
-# AI Code Wisdom を守って実装する
+# Torus Code を守って実装する
 
-このプロジェクトには、ユーザーが選んだ設計スタイル（`.wisdom/profile.yaml`）があります。コードを書く・直す・整理するときは、次に従ってください。
+このプロジェクトには、ユーザーが選んだ設計スタイル（`.torus/profile.yaml`）があります。コードを書く・直す・整理するときは、次に従ってください。
 
 ## 基本
 
-- セッションの開始時に渡された「AI Code Wisdom：このプロジェクトの設計方針」（L0）に従う。上にある原則ほど優先する。
-- 見えていないときは、MCP ツール `wisdom_principles`（`path` に書くファイルを渡すと、そのファイル向けの確認事項も返る）か `wisdom principles` で確かめる。
+- セッションの開始時に渡された「Torus Code：このプロジェクトの設計方針」（L0）に従う。上にある原則ほど優先する。
+- 見えていないときは、MCP ツール `torus_principles`（`path` に書くファイルを渡すと、そのファイル向けの確認事項も返る）か `torus principles` で確かめる。
 - 依頼の種類ごとの手順は、プロンプトごとに自動で渡される。次の流れが基本。
   - バグ修正：再現条件を特定 → 失敗する再現テスト → 根本原因を直す → 同じ原因の箇所を探す
   - リファクタリング：先に今の動作をテストで固定 → 振る舞いを変えない → 無関係な変更を混ぜない → 小さく分ける
@@ -21,39 +21,39 @@ description: .wisdom/profile.yaml があるプロジェクトで、コードを�
 ## フックに止められたとき
 
 - ファイルを書くたびに自動で検査される。必須（mandatory）の原則に違反すると、書き込みの直後にフックが止める。メッセージの行番号・原則 ID・直し方（→ の行）に従って、そのファイルを直してから先へ進む。
-- 理由が分からない原則は `wisdom explain <ID>`（または `wisdom_explain`）で確かめる。
+- 理由が分からない原則は `torus explain <ID>`（または `torus_explain`）で確かめる。
 - 同じ違反で3回止められた場合は、それ以上止められなくなる。その違反を放置せず、直せない理由をユーザーに説明するか、例外を書く。
 - warning 以下の指摘は止まらないが、直せるなら直す。
 
-## 例外（wisdom-allow）
+## 例外（torus-allow）
 
 - 最後の手段。原則を守る別の書き方を探してから使う。
-- 該当行か直前の行に `wisdom-allow <ID>: 理由` を書く（例：`// wisdom-allow SEC-INJ-003: 固定の文字列だけを渡しており、外部入力は入らない`）。
+- 該当行か直前の行に `torus-allow <ID>: 理由` を書く（例：`// torus-allow SEC-INJ-003: 固定の文字列だけを渡しており、外部入力は入らない`）。
 - 理由は必ず書く。理由のない例外は無効で、違反のままになる。
 - 例外を書いたら、場所と理由を必ずユーザーに伝える。
 
 ## 原則がぶつかったとき
 
 - L0 の「原則がぶつかったとき」に書かれた優先の向きに従う。
-- 判断したら、MCP ツール `wisdom_record_decision`（`decision` と `principle_ids`）で `.wisdom/decisions.md` に1行で記録する。
+- 判断したら、MCP ツール `torus_record_decision`（`decision` と `principle_ids`）で `.torus/decisions.md` に1行で記録する。
 
 ## 必須の原則に反する依頼
 
 - 依頼が必須の原則に反する場合（例：入力検証を省く、鍵をコードに直接書く、証明書の検証を切る）は、実装しない。
-- 反する理由と、安全な代替案を示して、ユーザーの判断を仰ぐ。ユーザーが理解したうえで進めると決めたら、`wisdom-allow` で理由を残して実装する。
+- 反する理由と、安全な代替案を示して、ユーザーの判断を仰ぐ。ユーザーが理解したうえで進めると決めたら、`torus-allow` で理由を残して実装する。
 
 ## 最後の報告
 
 作業の最後に、次の3行で報告する。
 
 1. 適用した原則：効いた原則の ID と、どう適用したか
-2. 検査の結果：`wisdom check --changed` の結果（必須の違反の数、残っている warning）
+2. 検査の結果：`torus check --changed` の結果（必須の違反の数、残っている warning）
 3. 未解決：直せなかった指摘、書いた例外とその理由、ユーザーに確認したいこと
 
 ## 使える道具
 
-- `wisdom check --changed`：変更した行の検査（`wisdom check <パス>` で特定のファイル）
-- `wisdom explain <ID>`：原則の理由・検査・例
-- `wisdom principles`：有効な原則の一覧
-- MCP ツール：`wisdom_principles`、`wisdom_check`、`wisdom_explain`、`wisdom_record_decision`、`wisdom_styles`
-- `wisdom` が見つからないときは、このプラグインのフォルダの `bin/wisdom` を直接実行する
+- `torus check --changed`：変更した行の検査（`torus check <パス>` で特定のファイル）
+- `torus explain <ID>`：原則の理由・検査・例
+- `torus principles`：有効な原則の一覧
+- MCP ツール：`torus_principles`、`torus_check`、`torus_explain`、`torus_record_decision`、`torus_styles`
+- `torus` が見つからないときは、このプラグインのフォルダの `bin/torus` を直接実行する

@@ -162,12 +162,12 @@ function postToolUse(input: any, paths: ProjectPaths, compiled: Compiled): HookR
   let advisoryText = feedback.advisory;
   if (advisoryText && demoted.length) {
     advisoryText +=
-      "\n同じ違反を3回止めたため、以後は止めません。直せない理由をユーザーに説明するか、wisdom-allow を書いてください";
+      "\n同じ違反を3回止めたため、以後は止めません。直せない理由をユーザーに説明するか、torus-allow を書いてください";
   }
   if (feedback.blocking) {
     const invalid = new Set((checked?.invalidAllows ?? []).map((f) => f.fingerprint));
     let reason = feedback.blocking;
-    if (blocking.some((b) => invalid.has(b.fingerprint))) reason += "\nwisdom-allow には理由が必要です。`wisdom-allow ID: 理由` の形で書いてください。";
+    if (blocking.some((b) => invalid.has(b.fingerprint))) reason += "\ntorus-allow には理由が必要です。`torus-allow ID: 理由` の形で書いてください。";
     if (advisoryText) reason += "\n\n" + advisoryText;
     return { stdout: JSON.stringify({ decision: "block", reason }), exitCode: 0 };
   }
@@ -191,7 +191,7 @@ function stop(input: any, paths: ProjectPaths, compiled: Compiled): HookResult {
   }
   if (remaining.length > 0) {
     const lines = remaining.map((f) => `- ${f.file}:L${f.line} [${f.principle}] ${f.message}`);
-    const reason = `[AI Code Wisdom] 終了する前に、この作業で入った必須原則の違反を直してください：\n${lines.join("\n")}`;
+    const reason = `[Torus Code] 終了する前に、この作業で入った必須原則の違反を直してください：\n${lines.join("\n")}`;
     return { stdout: JSON.stringify({ decision: "block", reason }), exitCode: 0 };
   }
 
@@ -201,7 +201,7 @@ function stop(input: any, paths: ProjectPaths, compiled: Compiled): HookResult {
   if ((mode === "always" || (mode === "auto" && changedLines >= REVIEW_LINE_THRESHOLD)) && !meta.reviewRequested) {
     meta.reviewRequested = true;
     writeMeta(paths, session, meta);
-    const reason = `[AI Code Wisdom] この作業では ${changedLines} 行を変更しました。終了する前に Agent ツールで subagent_type "ai-code-wisdom:wisdom-reviewer" を呼んでレビューを受け、必要な修正をしてから、最後に「適用した原則／検査の結果／未解決」を報告してください。`;
+    const reason = `[Torus Code] この作業では ${changedLines} 行を変更しました。終了する前に Agent ツールで subagent_type "torus-code:torus-reviewer" を呼んでレビューを受け、必要な修正をしてから、最後に「適用した原則／検査の結果／未解決」を報告してください。`;
     return { stdout: JSON.stringify({ decision: "block", reason }), exitCode: 0 };
   }
   appendLedger(paths, { event: "stop", session, files: states.map((s) => s.file), changedLines });
@@ -222,7 +222,7 @@ function userPromptSubmit(input: any, compiled: Compiled): HookResult {
   return text ? { stdout: additionalContext("UserPromptSubmit", text), exitCode: 0 } : { exitCode: 0 };
 }
 
-/** 未設定のプロジェクトでは、最初の依頼でだけ初回設定を案内する（以後は /ai-code-wisdom:style などで変える） */
+/** 未設定のプロジェクトでは、最初の依頼でだけ初回設定を案内する（以後は /torus-code:style などで変える） */
 function firstRunOffer(dir: string): HookResult {
   const text = takeFirstRunOffer(dir, os.homedir());
   return text ? { stdout: additionalContext("UserPromptSubmit", text), exitCode: 0 } : { exitCode: 0 };
@@ -232,9 +232,9 @@ function firstRunOffer(dir: string): HookResult {
 function configErrorNotice(err: unknown): HookResult {
   const reason = err instanceof Error ? err.message : String(err);
   const text = [
-    "[AI Code Wisdom] 設定を読めないため、このセッションでは自動検査が止まっています。",
+    "[Torus Code] 設定を読めないため、このセッションでは自動検査が止まっています。",
     `理由：${reason}`,
-    "`wisdom status` で確認し、.wisdom/profile.yaml などを直してください。直すまで、ファイルを書いても検査されません。",
+    "`torus status` で確認し、.torus/profile.yaml などを直してください。直すまで、ファイルを書いても検査されません。",
   ].join("\n");
   return { stdout: additionalContext("SessionStart", text), exitCode: 0 };
 }

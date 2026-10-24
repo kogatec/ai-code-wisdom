@@ -1,5 +1,5 @@
 id: security-resilience
-version: 0.1.1
+version: 0.1.2
 name: セキュリティ・障害耐性重視型
 description: 攻撃と障害の両方に対して、壊れにくく、壊れても被害が広がらないコードを書く
 values: [入力の検証, 秘密情報の保護, 最小権限, 障害の封じ込め, データの整合性]
@@ -16,7 +16,7 @@ languages: [typescript, python]
 enforcement:
   block: 原則が mandatory かつ ルールの severity が error のとき、直るまで先へ進ませない
   warn: それ以外の違反は AI に知らせるが、止めない
-  allow_inline: '理由を書いたコメント（wisdom-allow <原則ID>: 理由）がある箇所は、例外として監査の一覧に載せる'
+  allow_inline: '理由を書いたコメント（torus-allow <原則ID>: 理由）がある箇所は、例外として監査の一覧に載せる'
 
 # L0（常駐ルール）に載せる順。summary を1行ずつ使う
 principles:

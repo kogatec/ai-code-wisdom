@@ -74,7 +74,7 @@ export function readProfile(file: string): Profile {
   return parseProfile(fs.readFileSync(file, "utf8"));
 }
 
-const HEADER = `# AI Code Wisdom の設定（チームで共有するため、コミットしてください）
+const HEADER = `# Torus Code の設定（チームで共有するため、コミットしてください）
 #   primary   : 主スタイル（最も優先する設計スタイル）
 #   secondary : 副スタイルと重み（0〜1。大きいほど優先）
 #   phase     : production（本番）/ prototype（試作。advisory の原則と info の検査を外す）

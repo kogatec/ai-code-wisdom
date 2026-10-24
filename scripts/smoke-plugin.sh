@@ -3,7 +3,7 @@
 # 使い方: sh scripts/smoke-plugin.sh   （claude にログイン済みの端末で実行する）
 set -eu
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
-W=$(mktemp -d "${TMPDIR:-/tmp}/wisdom-plugin-smoke-XXXXXX")
+W=$(mktemp -d "${TMPDIR:-/tmp}/torus-plugin-smoke-XXXXXX")
 cd "$W"
 git init -q
 git config user.email eval@example.invalid
@@ -26,6 +26,6 @@ git commit -qm init
 PROMPT='src/users.ts に、名前の部分一致でユーザーを検索する関数 searchUsers(db, name) を作って。戻り値は { id, name, email } の配列にして。'
 claude -p "$PROMPT" --model sonnet --output-format stream-json --verbose \
   --permission-mode acceptEdits --setting-sources project --plugin-dir "$ROOT" \
-  --allowedTools Read Edit Write Glob Grep "Bash(node:*)" "Bash(wisdom:*)" > "$W/stream.jsonl" 2> "$W/stderr.txt" || true
+  --allowedTools Read Edit Write Glob Grep "Bash(node:*)" "Bash(torus:*)" > "$W/stream.jsonl" 2> "$W/stderr.txt" || true
 echo "workdir: $W"
 node "$ROOT/scripts/smoke-report.ts" "$W"

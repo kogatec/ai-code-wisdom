@@ -16,7 +16,7 @@ test("export git-hook：pre-commit を書き、自分のものでなければ上
   const hook = path.join(root, ".git", "hooks", "pre-commit");
   const text = fs.readFileSync(hook, "utf8");
   assert.ok(text.startsWith("#!/bin/sh\n"));
-  assert.ok(text.includes("ai-code-wisdom"));
+  assert.ok(text.includes("torus-code"));
   assert.ok(text.includes('check --project "$(git rev-parse --show-toplevel)" --diff HEAD --fail-on blocking'));
   assert.ok(fs.statSync(hook).mode & 0o100, "実行権限");
   assert.equal(runCli(["export", "git-hook", "--project", root]).status, 0, "自分が書いたものは更新できる");
@@ -67,15 +67,15 @@ test("git の pre-commit フック：設定がリポジトリのサブディレ�
   git(repo, "add", "-A");
   const moved = commit();
   assert.notEqual(moved.status, 0);
-  assert.ok(moved.stderr.includes("wisdom export git-hook"), moved.stderr);
+  assert.ok(moved.stderr.includes("torus export git-hook"), moved.stderr);
 });
 
-test("git の pre-commit フック：--wisdom-dir で設定を外に置いても、その設定で検査する", () => {
+test("git の pre-commit フック：--torus-dir で設定を外に置いても、その設定で検査する", () => {
   const repo = tmpDir();
   git(repo, "init", "-q");
-  const wisdomDir = path.join(tmpDir(), "wisdom");
-  assert.equal(runCli(["init", "--project", repo, "--wisdom-dir", wisdomDir, "--primary", "security-resilience"]).status, 0);
-  assert.equal(runCli(["export", "git-hook", "--project", repo, "--wisdom-dir", wisdomDir]).status, 0);
+  const torusDir = path.join(tmpDir(), "torus");
+  assert.equal(runCli(["init", "--project", repo, "--torus-dir", torusDir, "--primary", "security-resilience"]).status, 0);
+  assert.equal(runCli(["export", "git-hook", "--project", repo, "--torus-dir", torusDir]).status, 0);
   write(repo, "src/repo.ts", SQL_VIOLATION);
   git(repo, "add", "-A");
   const blocked = spawnSync("git", ["-c", "user.name=t", "-c", "user.email=t@example.com", "commit", "-q", "-m", "x"], { cwd: repo, encoding: "utf8" });

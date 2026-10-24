@@ -21,7 +21,7 @@ class SandboxTestCase(unittest.TestCase):
     """
 
     def setUp(self):
-        self.root = Path(tempfile.mkdtemp(prefix="wisdom-store-")).resolve()
+        self.root = Path(tempfile.mkdtemp(prefix="torus-store-")).resolve()
         self.addCleanup(shutil.rmtree, self.root, ignore_errors=True)
         self.box = self.root / "box"
         self.upload_dir = self.box / "uploads"
@@ -108,22 +108,22 @@ class ShellInjectionTest(SandboxTestCase):
     def setUp(self):
         super().setUp()
         # 命令が実行されたら作られる印のファイル（OS の一時ディレクトリの下、実行ごとに別の名前）
-        self.marker = Path(tempfile.gettempdir()) / f"wisdom-eval-marker-{uuid.uuid4().hex}"
+        self.marker = Path(tempfile.gettempdir()) / f"torus-eval-marker-{uuid.uuid4().hex}"
         self.addCleanup(lambda: self.marker.unlink(missing_ok=True))
-        env = mock.patch.dict(os.environ, {"WISDOM_MARKER": str(self.marker)})
+        env = mock.patch.dict(os.environ, {"TORUS_MARKER": str(self.marker)})
         env.start()
         self.addCleanup(env.stop)
 
     def test_ファイル名に混ぜた命令は実行されない(self):
         names = [
-            'a; touch "$WISDOM_MARKER"',
-            'a$(touch "$WISDOM_MARKER")',
-            'a`touch "$WISDOM_MARKER"`',
-            "a' ; touch \"$WISDOM_MARKER\" ; echo '",
-            'a" ; touch "$WISDOM_MARKER" ; echo "',
-            'a && touch "$WISDOM_MARKER"',
-            'a | touch "$WISDOM_MARKER"',
-            'a & touch "$WISDOM_MARKER"',
+            'a; touch "$TORUS_MARKER"',
+            'a$(touch "$TORUS_MARKER")',
+            'a`touch "$TORUS_MARKER"`',
+            "a' ; touch \"$TORUS_MARKER\" ; echo '",
+            'a" ; touch "$TORUS_MARKER" ; echo "',
+            'a && touch "$TORUS_MARKER"',
+            'a | touch "$TORUS_MARKER"',
+            'a & touch "$TORUS_MARKER"',
         ]
         for name in names:
             (self.upload_dir / name).write_bytes(b"payload")
@@ -141,12 +141,12 @@ class ShellInjectionTest(SandboxTestCase):
     def test_圧縮形式に混ぜた命令は実行されない(self):
         store.save_upload("report.txt", b"payload")
         formats = [
-            'gz; touch "$WISDOM_MARKER"',
-            'gz && touch "$WISDOM_MARKER"',
-            'bz2 $(touch "$WISDOM_MARKER")',
-            '$(touch "$WISDOM_MARKER")',
-            '`touch "$WISDOM_MARKER"`',
-            'gz | touch "$WISDOM_MARKER"',
+            'gz; touch "$TORUS_MARKER"',
+            'gz && touch "$TORUS_MARKER"',
+            'bz2 $(touch "$TORUS_MARKER")',
+            '$(touch "$TORUS_MARKER")',
+            '`touch "$TORUS_MARKER"`',
+            'gz | touch "$TORUS_MARKER"',
         ]
         problems = []
         for fmt in formats:

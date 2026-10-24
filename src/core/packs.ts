@@ -214,7 +214,7 @@ export interface PackDiff {
   rulesChanged: boolean;
 }
 
-/** 2つの版のパックを原則単位で比べる（wisdom update で差分を見せるため） */
+/** 2つの版のパックを原則単位で比べる（torus update で差分を見せるため） */
 export function diffPacks(oldPack: Pack, newPack: Pack): PackDiff {
   const key = (p: Principle) => JSON.stringify(p);
   const oldMap = new Map(oldPack.principles.map((p) => [p.id, key(p)]));

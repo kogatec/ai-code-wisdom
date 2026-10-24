@@ -1,16 +1,16 @@
 {
-  "name": "ai-code-wisdom",
-  "version": "0.2.0",
+  "name": "torus-code",
+  "version": "0.3.0",
   "private": true,
-  "description": "ユーザーが選んだ設計スタイルを、AI が開発から保守まで守り続けるための原則パック・検査・Claude Code プラグイン",
+  "description": "Principle packs, automated checks, and a Claude Code plugin that keep AI coding agents true to the design style you choose, from development through maintenance",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/kogatec/ai-code-wisdom.git"
+    "url": "git+https://github.com/kogatec/torus-code.git"
   },
   "type": "module",
   "bin": {
-    "wisdom": "bin/wisdom"
+    "torus": "bin/torus"
   },
   "engines": {
     "node": ">=23.6"

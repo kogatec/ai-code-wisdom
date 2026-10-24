@@ -22,7 +22,7 @@ export function languageOf(file: string): "typescript" | "python" | null {
 
 export interface ProjectPaths {
   root: string;
-  wisdomDir: string;
+  torusDir: string;
   profile: string;
   lock: string;
   packsDir: string;
@@ -33,29 +33,29 @@ export interface ProjectPaths {
   auditHistory: string;
 }
 
-/** wisdomDir を指定すると、プロジェクトの外に設定を置ける（評価で使う） */
-export function projectPaths(root: string, wisdomDir = path.join(root, ".wisdom")): ProjectPaths {
+/** torusDir を指定すると、プロジェクトの外に設定を置ける（評価で使う） */
+export function projectPaths(root: string, torusDir = path.join(root, ".torus")): ProjectPaths {
   const absRoot = path.resolve(root);
-  const absWisdom = path.resolve(wisdomDir);
+  const absTorus = path.resolve(torusDir);
   return {
     root: absRoot,
-    wisdomDir: absWisdom,
-    profile: path.join(absWisdom, "profile.yaml"),
-    lock: path.join(absWisdom, "lock.json"),
-    packsDir: path.join(absWisdom, "packs"),
-    cacheDir: path.join(absWisdom, "cache"),
-    sessionsDir: path.join(absWisdom, "cache", "sessions"),
-    ledger: path.join(absWisdom, "ledger.jsonl"),
-    decisions: path.join(absWisdom, "decisions.md"),
-    auditHistory: path.join(absWisdom, "audit-history.jsonl"),
+    torusDir: absTorus,
+    profile: path.join(absTorus, "profile.yaml"),
+    lock: path.join(absTorus, "lock.json"),
+    packsDir: path.join(absTorus, "packs"),
+    cacheDir: path.join(absTorus, "cache"),
+    sessionsDir: path.join(absTorus, "cache", "sessions"),
+    ledger: path.join(absTorus, "ledger.jsonl"),
+    decisions: path.join(absTorus, "decisions.md"),
+    auditHistory: path.join(absTorus, "audit-history.jsonl"),
   };
 }
 
-/** start から親へたどり、.wisdom/profile.yaml がある場所を探す */
+/** start から親へたどり、.torus/profile.yaml がある場所を探す */
 export function findProjectRoot(start: string): string | null {
   let dir = path.resolve(start);
   for (;;) {
-    if (fs.existsSync(path.join(dir, ".wisdom", "profile.yaml"))) return dir;
+    if (fs.existsSync(path.join(dir, ".torus", "profile.yaml"))) return dir;
     const parent = path.dirname(dir);
     if (parent === dir) return null;
     dir = parent;

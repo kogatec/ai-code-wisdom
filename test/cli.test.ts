@@ -17,14 +17,14 @@ test("非対話の init：設定を作り、結果を表示する", () => {
   assert.ok(r.stdout.includes("主スタイル：セキュリティ・障害耐性重視型（security-resilience）"));
   assert.ok(r.stdout.includes("maintainable、重み 0.7"));
   assert.match(r.stdout, /有効な原則：\d+ 件（うち必須 9 件）/);
-  assert.ok(r.stdout.includes(".wisdom/profile.yaml"));
-  assert.ok(r.stdout.includes(".wisdom/packs/maintainable/"), "ディレクトリには / を付ける");
-  const profile = parseProfile(fs.readFileSync(path.join(dir, ".wisdom", "profile.yaml"), "utf8"));
+  assert.ok(r.stdout.includes(".torus/profile.yaml"));
+  assert.ok(r.stdout.includes(".torus/packs/maintainable/"), "ディレクトリには / を付ける");
+  const profile = parseProfile(fs.readFileSync(path.join(dir, ".torus", "profile.yaml"), "utf8"));
   assert.equal(profile.primary, "security-resilience");
   assert.deepEqual(profile.secondary, [{ pack: "maintainable", weight: 0.7 }]);
   assert.equal(profile.phase, "prototype");
   for (const f of ["lock.json", "decisions.md", ".gitignore", "packs/maintainable/pack.yaml"]) {
-    assert.ok(fs.existsSync(path.join(dir, ".wisdom", f)), f);
+    assert.ok(fs.existsSync(path.join(dir, ".torus", f)), f);
   }
 });
 
@@ -33,12 +33,12 @@ test("init：二重に実行するとエラー、--force なら上書き。--pri
   assert.equal(initIn(dir).status, 0);
   const again = initIn(dir);
   assert.equal(again.status, 2);
-  assert.ok(again.stderr.includes("wisdom: エラー：既に設定されています"));
+  assert.ok(again.stderr.includes("torus: エラー：既に設定されています"));
   assert.equal(initIn(dir, "--force").status, 0);
   const none = runCli(["init", "--project", tmpDir()]);
   assert.equal(none.status, 2);
   assert.ok(none.stderr.includes("--primary"));
-  assert.ok(none.stderr.includes("使い方：wisdom"));
+  assert.ok(none.stderr.includes("使い方：torus"));
   const bad = runCli(["init", "--project", tmpDir(), "--primary", "nope"]);
   assert.equal(bad.status, 2);
   assert.ok(bad.stderr.includes("パック nope はありません"));
@@ -48,7 +48,7 @@ test("init：主スタイルと同じ副スタイルは外す（style set と同
   const dir = tmpDir();
   const r = runCli(["init", "--project", dir, "--primary", "maintainable", "--secondary", "maintainable", "--secondary", "simple-readable"]);
   assert.equal(r.status, 0, r.stderr);
-  const profile = parseProfile(fs.readFileSync(path.join(dir, ".wisdom", "profile.yaml"), "utf8"));
+  const profile = parseProfile(fs.readFileSync(path.join(dir, ".torus", "profile.yaml"), "utf8"));
   assert.equal(profile.primary, "maintainable");
   assert.deepEqual(profile.secondary, [{ pack: "simple-readable", weight: 0.5 }]);
 });
@@ -58,13 +58,13 @@ test("init：副スタイルが重複していればエラーにし、何も書�
   const r = runCli(["init", "--project", dir, "--primary", "maintainable", "--secondary", "simple-readable", "--secondary", "simple-readable:0.7"]);
   assert.equal(r.status, 2);
   assert.ok(r.stderr.includes("simple-readable"), r.stderr);
-  assert.ok(!fs.existsSync(path.join(dir, ".wisdom")), "途中までの設定が残っている");
+  assert.ok(!fs.existsSync(path.join(dir, ".torus")), "途中までの設定が残っている");
   assert.equal(runCli(["init", "--project", dir, "--primary", "maintainable"]).status, 0);
 });
 
 test("style set：副スタイルが重複していればエラーにし、今の設定を壊さない", () => {
   const { root } = setupProject();
-  const profileFile = path.join(root, ".wisdom", "profile.yaml");
+  const profileFile = path.join(root, ".torus", "profile.yaml");
   const before = fs.readFileSync(profileFile, "utf8");
   const r = runCli(["style", "set", "--project", root, "--secondary", "simple-readable", "--secondary", "simple-readable"]);
   assert.equal(r.status, 2);
@@ -133,7 +133,7 @@ test("check --diff / --changed：変更した行だけを対象にする", () =>
 test("未設定のプロジェクトでは、エラーを出して 2", () => {
   const r = runCli(["check", "--project", tmpDir()]);
   assert.equal(r.status, 2);
-  assert.equal(r.stderr.trim(), "wisdom: エラー：未設定です。wisdom init を実行してください");
+  assert.equal(r.stderr.trim(), "torus: エラー：未設定です。torus init を実行してください");
 });
 
 test("explain：原則の説明。無い ID はエラー。未設定でも同梱パックから探せる", () => {
@@ -154,11 +154,11 @@ test("export agents-md：2回実行しても区画は1つで、既存の内容�
   assert.equal(runCli(["export", "agents-md", "--project", root]).status, 0);
   assert.equal(runCli(["export", "agents-md", "--project", root]).status, 0);
   const text = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
-  assert.equal(text.split("<!-- ai-code-wisdom:begin -->").length - 1, 1);
-  assert.equal(text.split("<!-- ai-code-wisdom:end -->").length - 1, 1);
+  assert.equal(text.split("<!-- torus-code:begin -->").length - 1, 1);
+  assert.equal(text.split("<!-- torus-code:end -->").length - 1, 1);
   assert.ok(text.startsWith("# 既存のメモ\n\n手で書いた内容\n"));
-  assert.ok(text.includes("# AI Code Wisdom：このプロジェクトの設計方針"));
-  assert.ok(text.includes("- ファイルを書いたら `wisdom check --changed` を実行し、[必須] の違反を直す"));
+  assert.ok(text.includes("# Torus Code：このプロジェクトの設計方針"));
+  assert.ok(text.includes("- ファイルを書いたら `torus check --changed` を実行し、[必須] の違反を直す"));
   assert.ok(!text.includes("ファイルを書くたびに自動で検査される"));
   // 区画の外の編集は、再実行しても残る
   fs.writeFileSync(path.join(root, "AGENTS.md"), text + "\n追記\n");
@@ -170,15 +170,15 @@ test("export agents-md：ファイルがなければ作る", () => {
   const { root } = setupProject();
   runCli(["export", "agents-md", "--project", root]);
   const text = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
-  assert.ok(text.startsWith("<!-- ai-code-wisdom:begin -->\n# AI Code Wisdom"));
-  assert.ok(text.endsWith("<!-- ai-code-wisdom:end -->\n"));
+  assert.ok(text.startsWith("<!-- torus-code:begin -->\n# Torus Code"));
+  assert.ok(text.endsWith("<!-- torus-code:end -->\n"));
 });
 
 test("export cursor", () => {
   const { root } = setupProject();
   assert.equal(runCli(["export", "cursor", "--project", root]).status, 0);
-  const text = fs.readFileSync(path.join(root, ".cursor", "rules", "ai-code-wisdom.mdc"), "utf8");
-  assert.ok(text.startsWith("---\ndescription: AI Code Wisdom の設計方針\nalwaysApply: true\n---\n# AI Code Wisdom"));
+  const text = fs.readFileSync(path.join(root, ".cursor", "rules", "torus-code.mdc"), "utf8");
+  assert.ok(text.startsWith("---\ndescription: Torus Code の設計方針\nalwaysApply: true\n---\n# Torus Code"));
 });
 
 test("styles・style・style set・status・principles", () => {
@@ -193,7 +193,7 @@ test("styles・style・style set・status・principles", () => {
   const set = runCli(["style", "set", "--project", root, "--secondary", "simple-readable:0.8", "--phase", "prototype"]);
   assert.equal(set.status, 0, set.stderr);
   assert.ok(set.stdout.includes("simple-readable、重み 0.8"));
-  const profile = parseProfile(fs.readFileSync(path.join(root, ".wisdom", "profile.yaml"), "utf8"));
+  const profile = parseProfile(fs.readFileSync(path.join(root, ".torus", "profile.yaml"), "utf8"));
   assert.deepEqual(profile.secondary, [{ pack: "simple-readable", weight: 0.8 }]);
   assert.equal(profile.phase, "prototype");
   assert.ok(runCli(["style", "set", "--project", root, "--secondary", "none"]).stdout.includes("副スタイル：なし"));
@@ -203,7 +203,7 @@ test("styles・style・style set・status・principles", () => {
   const status = runCli(["status", "--project", root]);
   assert.equal(status.status, 0);
   assert.ok(status.stdout.includes("lock.json：問題なし"));
-  assert.ok(status.stdout.includes("security-resilience 版 0.1.1"));
+  assert.ok(status.stdout.includes("security-resilience 版 0.1.2"));
 
   const list = runCli(["principles", "--project", root]).stdout.trim().split("\n");
   assert.match(list[0], /^\[SEC-IV-001\] 必須 /);
@@ -214,11 +214,11 @@ test("styles・style・style set・status・principles", () => {
 
 test("audit：件数・例外・前回からの増減を出し、履歴を追記する", () => {
   const { root } = setupProject();
-  write(root, "src/a.ts", SQL_VIOLATION + "// wisdom-allow SEC-INJ-002: 固定値のみ\nexport const q = (db: Db) => db.query(`DELETE FROM t WHERE id = ${1}`);\n// wisdom-allow SEC-INJ-003\nexport const e = (s: string) => eval(s);\n");
+  write(root, "src/a.ts", SQL_VIOLATION + "// torus-allow SEC-INJ-002: 固定値のみ\nexport const q = (db: Db) => db.query(`DELETE FROM t WHERE id = ${1}`);\n// torus-allow SEC-INJ-003\nexport const e = (s: string) => eval(s);\n");
   const first = runCli(["audit", "--project", root]);
   assert.equal(first.status, 0, first.stderr);
   assert.ok(first.stdout.includes("- [SEC-INJ-002] 1 件（error 1）"));
-  assert.ok(first.stdout.includes("### 例外（wisdom-allow）1 件\n- src/a.ts:"));
+  assert.ok(first.stdout.includes("### 例外（torus-allow）1 件\n- src/a.ts:"));
   assert.ok(first.stdout.includes("固定値のみ"));
   assert.ok(first.stdout.includes("### 理由のない例外 1 件"));
   assert.ok(first.stdout.includes("前回の記録はありません"));
@@ -227,7 +227,7 @@ test("audit：件数・例外・前回からの増減を出し、履歴を追記
   const second = runCli(["audit", "--project", root]);
   assert.match(second.stdout, /全体：\d+ → \d+（\+2）/);
   assert.ok(second.stdout.includes("- [SEC-INJ-002] +1"));
-  const history = fs.readFileSync(path.join(root, ".wisdom", "audit-history.jsonl"), "utf8").trim().split("\n").map((l) => JSON.parse(l));
+  const history = fs.readFileSync(path.join(root, ".torus", "audit-history.jsonl"), "utf8").trim().split("\n").map((l) => JSON.parse(l));
   assert.equal(history.length, 2);
   assert.equal(history[1].total, history[0].total + 2);
   assert.equal(history[1].byPrinciple["SEC-INJ-002"], 2);
@@ -242,14 +242,14 @@ test("audit：件数・例外・前回からの増減を出し、履歴を追記
 test("update・lock", () => {
   const { root } = setupProject();
   assert.ok(runCli(["update", "--project", root]).stdout.startsWith("更新はありません"));
-  const pack = path.join(root, ".wisdom", "packs", "maintainable", "pack.yaml");
+  const pack = path.join(root, ".torus", "packs", "maintainable", "pack.yaml");
   fs.appendFileSync(pack, "\n# 手で編集\n");
   assert.ok(runCli(["status", "--project", root]).stdout.includes("中身が変わっています"));
   assert.equal(runCli(["lock", "--project", root]).status, 0);
   assert.ok(runCli(["status", "--project", root]).stdout.includes("lock.json：問題なし"));
   const plan = runCli(["update", "--project", root]);
-  assert.ok(plan.stdout.includes("maintainable：0.1.1 → 0.1.1"));
-  assert.ok(plan.stdout.includes("wisdom update --yes"));
+  assert.ok(plan.stdout.includes("maintainable：0.1.2 → 0.1.2"));
+  assert.ok(plan.stdout.includes("torus update --yes"));
   assert.ok(runCli(["update", "--yes", "--project", root]).stdout.includes("更新しました"));
   assert.ok(runCli(["update", "--project", root]).stdout.startsWith("更新はありません"));
 });
@@ -283,22 +283,22 @@ test("review-context：git でなければ最新のセッションで触った�
   assert.ok(!r.stdout.includes("## git diff"));
 });
 
-test("--wisdom-dir：設定の置き場所をプロジェクトの外にできる", () => {
+test("--torus-dir：設定の置き場所をプロジェクトの外にできる", () => {
   const root = tmpDir();
-  const wisdomDir = tmpDir();
+  const torusDir = tmpDir();
   write(root, "src/repo.ts", SQL_VIOLATION);
-  const init = runCli(["init", "--project", root, "--wisdom-dir", wisdomDir, "--primary", "security-resilience"]);
+  const init = runCli(["init", "--project", root, "--torus-dir", torusDir, "--primary", "security-resilience"]);
   assert.equal(init.status, 0, init.stderr);
-  assert.ok(fs.existsSync(path.join(wisdomDir, "profile.yaml")));
-  assert.ok(!fs.existsSync(path.join(root, ".wisdom")));
-  const r = runCli(["check", "--project", root, "--wisdom-dir", wisdomDir, "--json", "--fail-on", "never"]);
+  assert.ok(fs.existsSync(path.join(torusDir, "profile.yaml")));
+  assert.ok(!fs.existsSync(path.join(root, ".torus")));
+  const r = runCli(["check", "--project", root, "--torus-dir", torusDir, "--json", "--fail-on", "never"]);
   assert.equal(r.status, 0);
   assert.ok(JSON.parse(r.stdout).findings.some((f: any) => f.principle === "SEC-INJ-002" && f.file === "src/repo.ts"));
-  assert.equal(runCli(["check", "--project", root, "--wisdom-dir", tmpDir()]).status, 2);
+  assert.equal(runCli(["check", "--project", root, "--torus-dir", tmpDir()]).status, 2);
 });
 
 test("help・引数なし・不明なコマンド・不明なオプション", () => {
-  assert.ok(runCli([]).stdout.includes("使い方：wisdom <コマンド>"));
+  assert.ok(runCli([]).stdout.includes("使い方：torus <コマンド>"));
   assert.ok(runCli(["help"]).stdout.includes("check [パス...]"));
   const unknown = runCli(["nope"]);
   assert.equal(unknown.status, 2);
@@ -306,14 +306,14 @@ test("help・引数なし・不明なコマンド・不明なオプション", (
   assert.equal(runCli(["check", "--nope"]).status, 2);
 });
 
-test("bin/wisdom：直接でも、シンボリックリンク経由でも動く", () => {
+test("bin/torus：直接でも、シンボリックリンク経由でも動く", () => {
   const direct = spawnSync(BIN, ["help"], { encoding: "utf8" });
   assert.equal(direct.status, 0, direct.stderr);
-  assert.ok(direct.stdout.includes("使い方：wisdom"));
+  assert.ok(direct.stdout.includes("使い方：torus"));
   const dir = tmpDir();
-  fs.symlinkSync(BIN, path.join(dir, "wisdom"));
-  fs.symlinkSync(path.join(dir, "wisdom"), path.join(dir, "wisdom2"));
-  for (const name of ["wisdom", "wisdom2"]) {
+  fs.symlinkSync(BIN, path.join(dir, "torus"));
+  fs.symlinkSync(path.join(dir, "torus"), path.join(dir, "torus2"));
+  for (const name of ["torus", "torus2"]) {
     const viaLink = spawnSync(path.join(dir, name), ["styles", "--json"], { encoding: "utf8" });
     assert.equal(viaLink.status, 0, viaLink.stderr);
     assert.equal(JSON.parse(viaLink.stdout).length, 3);

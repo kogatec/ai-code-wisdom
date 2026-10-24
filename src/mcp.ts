@@ -15,13 +15,13 @@ import {
 } from "./core/render.ts";
 import { loadCompiled } from "./core/resolve.ts";
 
-const NOT_CONFIGURED = "このプロジェクトは未設定です。/ai-code-wisdom:init で設計スタイルを選べます";
+const NOT_CONFIGURED = "このプロジェクトは未設定です。/torus-code:init で設計スタイルを選べます";
 
 const projectDirProp = { type: "string", description: "プロジェクトのディレクトリ（省略時は現在のプロジェクト）" };
 
 const TOOLS = [
   {
-    name: "wisdom_principles",
+    name: "torus_principles",
     description: "このプロジェクトの設計方針（有効な原則と優先順位）を返す。path を渡すと、そのファイルを書くときの確認事項も返す",
     inputSchema: {
       type: "object",
@@ -32,7 +32,7 @@ const TOOLS = [
     },
   },
   {
-    name: "wisdom_check",
+    name: "torus_check",
     description: "静的検査を実行して、原則の違反を返す",
     inputSchema: {
       type: "object",
@@ -44,7 +44,7 @@ const TOOLS = [
     },
   },
   {
-    name: "wisdom_explain",
+    name: "torus_explain",
     description: "原則の理由・検査方法・例を返す",
     inputSchema: {
       type: "object",
@@ -53,8 +53,8 @@ const TOOLS = [
     },
   },
   {
-    name: "wisdom_record_decision",
-    description: "設計上の判断（原則の衝突の解決・構造の変更など）を .wisdom/decisions.md に1行で記録する",
+    name: "torus_record_decision",
+    description: "設計上の判断（原則の衝突の解決・構造の変更など）を .torus/decisions.md に1行で記録する",
     inputSchema: {
       type: "object",
       properties: {
@@ -66,7 +66,7 @@ const TOOLS = [
     },
   },
   {
-    name: "wisdom_styles",
+    name: "torus_styles",
     description: "選べる設計スタイル（パック）の一覧と特徴を返す",
     inputSchema: { type: "object", properties: {} },
   },
@@ -92,10 +92,10 @@ function today(): string {
 
 function callTool(name: string, args: Args, env: NodeJS.ProcessEnv) {
   if (!TOOLS.some((t) => t.name === name)) return text(`不明なツールです：${name}`, true);
-  if (name === "wisdom_styles") return text(renderStyles(listPacks(BUNDLED_PACKS_DIR)));
+  if (name === "torus_styles") return text(renderStyles(listPacks(BUNDLED_PACKS_DIR)));
 
   const paths = projectFor(args, env);
-  if (name === "wisdom_explain") {
+  if (name === "torus_explain") {
     if (typeof args.id !== "string" || !args.id.trim()) return text("id を指定してください", true);
     const found = findPrincipleForExplain(paths, paths ? loadCompiled(paths) : null, args.id);
     return found ? text(renderExplain(found)) : text(`原則 ${args.id} は見つかりません`, true);
@@ -104,14 +104,14 @@ function callTool(name: string, args: Args, env: NodeJS.ProcessEnv) {
   const compiled = loadCompiled(paths);
 
   switch (name) {
-    case "wisdom_principles": {
+    case "torus_principles": {
       const l0 = renderSessionContext(compiled);
       if (typeof args.path !== "string" || !args.path) return text(l0);
       const rel = relativeToRoot(paths.root, path.resolve(paths.root, args.path));
       if (rel === null) return text(`${args.path} はプロジェクトの外です`, true);
       return text((renderFileContext(compiled, rel) ?? `${rel} に追加で確かめる観点はありません`) + "\n\n" + l0);
     }
-    case "wisdom_check": {
+    case "torus_check": {
       const given = Array.isArray(args.paths) ? args.paths.map(String) : [];
       const result = check(paths, compiled, {
         paths: given,
@@ -119,7 +119,7 @@ function callTool(name: string, args: Args, env: NodeJS.ProcessEnv) {
       });
       return text(renderCheckReport(result));
     }
-    case "wisdom_record_decision": {
+    case "torus_record_decision": {
       if (typeof args.decision !== "string" || !args.decision.trim()) return text("decision を指定してください", true);
       const ids = Array.isArray(args.principle_ids) ? args.principle_ids.map(String).filter(Boolean) : [];
       const decision = args.decision.replace(/\s*\n\s*/g, " ").trim();
@@ -145,7 +145,7 @@ function handle(msg: any, env: NodeJS.ProcessEnv): object | null {
       return reply({
         protocolVersion: msg.params?.protocolVersion ?? "2025-06-18",
         capabilities: { tools: {} },
-        serverInfo: { name: "ai-code-wisdom", version: TOOL_VERSION },
+        serverInfo: { name: "torus-code", version: TOOL_VERSION },
       });
     case "ping":
       return reply({});

@@ -37,12 +37,12 @@ test("guessLayers：パスから層を推測する", () => {
 test("renderSessionContext：L0 の構成と長さ", () => {
   const { compiled } = setupProject({ primary: "security-resilience", secondary: [{ pack: "simple-readable", weight: 0.7 }] });
   const text = renderSessionContext(compiled);
-  assert.ok(text.startsWith("# AI Code Wisdom：このプロジェクトの設計方針\n"));
+  assert.ok(text.startsWith("# Torus Code：このプロジェクトの設計方針\n"));
   assert.ok(text.includes("主スタイル：セキュリティ・障害耐性重視型 ／ 副スタイル：シンプル・可読性重視型（重み 0.7） ／ 段階：本番（production）"));
   assert.ok(text.includes("## 必須（どのスタイルでも外せない）\n- [SEC-IV-001]"));
   assert.ok(text.includes("依頼がこれらに反する場合は、実装せずに理由と安全な代替案を示し、ユーザーの判断を仰ぐ。"));
   assert.ok(text.includes("## 優先して守る原則（上ほど優先）"));
-  assert.match(text, /- ほか \d+ 件（wisdom_principles ツールか `wisdom principles` で確認）/);
+  assert.match(text, /- ほか \d+ 件（torus_principles ツールか `torus principles` で確認）/);
   assert.ok(text.includes("## 原則がぶつかったとき\n- 抽象化の量：「増やす」を優先（"));
   assert.ok(text.includes("## 進め方\n- ファイルを書くたびに自動で検査される。"));
   const listed = text.split("\n").filter((l) => l.startsWith("- [")).length;
@@ -61,7 +61,7 @@ test("renderSessionContext：必須がない・軸の衝突がない・試作", 
 test("renderFileContext：層に合う review のある原則を最大5件", () => {
   const { compiled } = setupProject();
   const db = renderFileContext(compiled, "src/db/users.ts")!;
-  assert.ok(db.startsWith("[AI Code Wisdom] src/db/users.ts を書くときに確かめること（機械では検査できない部分）：\n"));
+  assert.ok(db.startsWith("[Torus Code] src/db/users.ts を書くときに確かめること（機械では検査できない部分）：\n"));
   assert.ok(db.includes("- [SEC-INJ-002] 動的に変わる部分"));
   assert.ok(db.split("\n").length - 1 <= 5);
   const plain = renderFileContext(compiled, "src/util.ts")!;
@@ -98,14 +98,14 @@ test("renderFindingsFeedback：blocking と advisory を分ける", () => {
   assert.equal(
     fb.blocking,
     [
-      "[AI Code Wisdom] src/a.ts に必須原則の違反が入りました。直してから先に進んでください。",
+      "[Torus Code] src/a.ts に必須原則の違反が入りました。直してから先に進んでください。",
       "- L3 [SEC-INJ-002] SQL を連結しています（db.query(`...${x}`)）",
       "  → プレースホルダを使ってください",
-      "本当に例外が必要なら、その行に `wisdom-allow SEC-INJ-002: 理由` を書き、ユーザーに説明してください。",
+      "本当に例外が必要なら、その行に `torus-allow SEC-INJ-002: 理由` を書き、ユーザーに説明してください。",
     ].join("\n"),
   );
   const lines = fb.advisory!.split("\n");
-  assert.equal(lines[0], "[AI Code Wisdom] src/a.ts の検査結果（止めはしませんが、直せるなら直してください）：");
+  assert.equal(lines[0], "[Torus Code] src/a.ts の検査結果（止めはしませんが、直せるなら直してください）：");
   assert.equal(lines[1], "- L1 [MNT-TYPE-006] any です");
   assert.equal(lines[2], "  → unknown を使う");
   assert.equal(lines.filter((l) => l.includes("[MNT-DOC-014]")).length, 5);

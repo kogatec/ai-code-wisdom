@@ -1,27 +1,27 @@
 ---
-description: 設計スタイル（主・副・段階）を選んで、このプロジェクトに AI Code Wisdom を設定する
-allowed-tools: Bash(wisdom:*), AskUserQuestion, Read
+description: 設計スタイル（主・副・段階）を選んで、このプロジェクトに Torus Code を設定する
+allowed-tools: Bash(torus:*), AskUserQuestion, Read
 ---
 
-このプロジェクトに AI Code Wisdom を設定します。次の順に進めてください。
+このプロジェクトに Torus Code を設定します。次の順に進めてください。
 
-1. `wisdom styles` を実行し、選べるスタイルの ID・名前・特徴を確かめる（ID は推測せず、この出力にあるものだけを使う）。
-2. すでに設定済みか調べる（`wisdom status`）。設定済みなら、今の設定を見せて「上書きしてよいか」をユーザーに確かめる。了承が得られたときだけ、手順 4 のコマンドに `--force` を付ける。
-3. AskUserQuestion で次の3つを聞く。選択肢の説明には、`wisdom styles` の「重視する価値」「向いているプロジェクト」「トレードオフ」を短く使う。
+1. `torus styles` を実行し、選べるスタイルの ID・名前・特徴を確かめる（ID は推測せず、この出力にあるものだけを使う）。
+2. すでに設定済みか調べる（`torus status`）。設定済みなら、今の設定を見せて「上書きしてよいか」をユーザーに確かめる。了承が得られたときだけ、手順 4 のコマンドに `--force` を付ける。
+3. AskUserQuestion で次の3つを聞く。選択肢の説明には、`torus styles` の「重視する価値」「向いているプロジェクト」「トレードオフ」を短く使う。
    - 主スタイル（1つ）：最も優先する設計スタイル
    - 副スタイル（複数選べる。「なし」も可）：主スタイルと矛盾しない範囲で補うスタイル。重みの指定がなければ 0.5
    - 段階：本番（production）か 試作（prototype）。試作では推奨（advisory）の原則と info の検査を外す
 4. 答えをもとに実行する。副スタイルは `--secondary` を1つにつき1回付ける（重みを変えるなら `ID:0.7`）。
 
    ```
-   wisdom init --primary <ID> --secondary <ID> --secondary <ID> --phase production
+   torus init --primary <ID> --secondary <ID> --secondary <ID> --phase production
    ```
 
-5. 最後に `wisdom status` を実行し、次のことを短く（5行以内で）伝える。
+5. 最後に `torus status` を実行し、次のことを短く（5行以内で）伝える。
    - 選んだ主スタイル・副スタイル・段階
    - 有効な原則の数（うち必須の数）と、静的検査のルール数
    - 次に起きること：セッションの開始時に設計方針が自動で渡され、ファイルを書くたびに自動で検査される。必須の原則に違反すると、直すまで先へ進めない
-   - `.wisdom/` はチームで共有するためコミットしてよい（`cache/` と `ledger.jsonl` は自動で除外される）
-   - 後から変えるときは `/ai-code-wisdom:style`
+   - `.torus/` はチームで共有するためコミットしてよい（`cache/` と `ledger.jsonl` は自動で除外される）
+   - 後から変えるときは `/torus-code:style`
 
-`wisdom` コマンドが見つからないときは、このプラグインのフォルダにある `bin/wisdom` を直接実行する。
+`torus` コマンドが見つからないときは、このプラグインのフォルダにある `bin/torus` を直接実行する。

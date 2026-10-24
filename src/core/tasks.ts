@@ -93,8 +93,8 @@ export function renderTaskContext(types: TaskType[], risky: string[], compiled: 
   if (lines.length === 0 && warnings.length === 0) return null;
   const heading =
     types.length > 0
-      ? `[AI Code Wisdom] この依頼の進め方（${types.map((t) => TASK_NAMES[t]).join("・")}）：`
-      : "[AI Code Wisdom] この依頼についての注意：";
+      ? `[Torus Code] この依頼の進め方（${types.map((t) => TASK_NAMES[t]).join("・")}）：`
+      : "[Torus Code] この依頼についての注意：";
   const out = [heading, ...lines];
   if (warnings.length) out.push(...(lines.length ? [""] : []), ...warnings);
   return out.join("\n");

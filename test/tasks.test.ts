@@ -35,7 +35,7 @@ test("必須原則に触れうる依頼を見つける", () => {
 test("renderTaskContext：手順と、有効な必須原則に絞った注意", () => {
   const { compiled } = setupProject();
   const text = renderTaskContext(["bugfix"], ["SEC-IV-001", "SEC-SECRET-005"], compiled)!;
-  assert.ok(text.startsWith("[AI Code Wisdom] この依頼の進め方（バグ修正）："));
+  assert.ok(text.startsWith("[Torus Code] この依頼の進め方（バグ修正）："));
   assert.ok(text.includes("修正前に失敗する再現テストを書く"));
   assert.ok(text.includes("- [SEC-IV-001] 外部入力は入口でスキーマ検証し"));
   assert.ok(text.includes("この依頼はこの原則に反する可能性があります。反するなら実装せず、理由と代替案を示してください"));

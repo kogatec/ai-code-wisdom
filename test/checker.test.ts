@@ -52,14 +52,14 @@ test("Python でも検出する", () => {
   assert.equal(f.line, 2);
 });
 
-test("wisdom-allow：理由があれば例外、直前の行でも同じ行でもよい", () => {
+test("torus-allow：理由があれば例外、直前の行でも同じ行でもよい", () => {
   const { root, paths, compiled } = setupProject();
   write(
     root,
     "src/a.ts",
-    "// wisdom-allow SEC-INJ-002: 固定の ID だけを渡す内部ツール\n" +
+    "// torus-allow SEC-INJ-002: 固定の ID だけを渡す内部ツール\n" +
       "export const q1 = (db: Db) => db.query(`SELECT * FROM t WHERE id = ${1}`);\n" +
-      "export const q2 = (db: Db) => db.query(`SELECT * FROM t WHERE id = ${2}`); // wisdom-allow SEC-IV-001, SEC-INJ-002: 同上\n",
+      "export const q2 = (db: Db) => db.query(`SELECT * FROM t WHERE id = ${2}`); // torus-allow SEC-IV-001, SEC-INJ-002: 同上\n",
   );
   const result = check(paths, compiled);
   assert.equal(inj(result).length, 0);
@@ -68,14 +68,14 @@ test("wisdom-allow：理由があれば例外、直前の行でも同じ行で�
   assert.deepEqual(result.invalidAllows, []);
 });
 
-test("wisdom-allow：理由がなければ例外にならず、invalidAllows にも入る", () => {
+test("torus-allow：理由がなければ例外にならず、invalidAllows にも入る", () => {
   const { root, paths, compiled } = setupProject();
   write(
     root,
     "src/b.ts",
-    "// wisdom-allow SEC-INJ-002\n" +
+    "// torus-allow SEC-INJ-002\n" +
       "export const q1 = (db: Db) => db.query(`SELECT * FROM t WHERE id = ${1}`);\n" +
-      "export const q2 = (db: Db) => db.query(`SELECT * FROM t WHERE id = ${2}`); // wisdom-allow SEC-INJ-002:   \n",
+      "export const q2 = (db: Db) => db.query(`SELECT * FROM t WHERE id = ${2}`); // torus-allow SEC-INJ-002:   \n",
   );
   const result = check(paths, compiled);
   assert.equal(inj(result).length, 2);
@@ -83,14 +83,14 @@ test("wisdom-allow：理由がなければ例外にならず、invalidAllows に
   assert.equal(result.invalidAllows.filter((f) => f.principle === "SEC-INJ-002").length, 2);
 });
 
-test("wisdom-allow：別の原則の ID や、離れた行のコメントでは例外にならない", () => {
+test("torus-allow：別の原則の ID や、離れた行のコメントでは例外にならない", () => {
   const { root, paths, compiled } = setupProject();
   write(
     root,
     "src/c.ts",
-    "// wisdom-allow SEC-IV-001: 別の原則\n" +
+    "// torus-allow SEC-IV-001: 別の原則\n" +
       "export const q1 = (db: Db) => db.query(`SELECT * FROM t WHERE id = ${1}`);\n" +
-      "// wisdom-allow SEC-INJ-002: 2行前では効かない\n" +
+      "// torus-allow SEC-INJ-002: 2行前では効かない\n" +
       "\n" +
       "export const q2 = (db: Db) => db.query(`SELECT * FROM t WHERE id = ${2}`);\n",
   );
@@ -146,7 +146,7 @@ test("paths を指定すると、そのファイルだけを検査する（存�
   assert.equal(inj(dir).length, 2);
 });
 
-test("node_modules や .wisdom の中は検査しない", () => {
+test("node_modules や .torus の中は検査しない", () => {
   const { root, paths, compiled } = setupProject();
   write(root, "node_modules/x/index.ts", SQL_VIOLATION);
   write(root, "dist/out.ts", SQL_VIOLATION);

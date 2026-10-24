@@ -1,4 +1,4 @@
-// 評価ハーネス：同じ依頼を「プラグインなし（baseline）」と「あり（wisdom）」の Claude に実行させ、
+// 評価ハーネス：同じ依頼を「プラグインなし（baseline）」と「あり（torus）」の Claude に実行させ、
 // 原則の違反・隠しテストの通過・トークンを比べる。使い方は --help。
 
 import { spawn } from "node:child_process";
@@ -22,7 +22,7 @@ const GIT_TIMEOUT_MS = 60_000;
 const TEST_TIMEOUT_MS = 5 * 60_000;
 const MAX_CAPTURE_BYTES = 64 * 1024 * 1024;
 
-const CONDITIONS = ["baseline", "wisdom"] as const;
+const CONDITIONS = ["baseline", "torus"] as const;
 type Condition = (typeof CONDITIONS)[number];
 
 /** 課題を並べる順（仕様の表の順）。ここにないものは名前順で最後に付ける */
@@ -43,14 +43,14 @@ const ALLOWED_TOOLS = [
   "Bash(git status:*)",
   "Bash(git diff:*)",
 ];
-const WISDOM_TOOL = "Bash(wisdom:*)";
+const TORUS_TOOL = "Bash(torus:*)";
 
 const SEVERITY_WEIGHT: Record<string, number> = { error: 3, warning: 2, info: 1, hint: 0 };
 
 const USAGE = `使い方：node eval/run.ts [オプション]
 
   --tasks a,b          実行する課題（既定：すべて）
-  --conditions a,b     baseline, wisdom（既定：両方）
+  --conditions a,b     baseline, torus（既定：両方）
   --reps N             課題×条件ごとの繰り返し回数（既定：1）
   --model NAME         claude に渡すモデル（既定：sonnet）
   --concurrency N      同時に動かす実行の数（既定：3）
@@ -76,7 +76,7 @@ interface Task {
   title: string;
   language: "typescript" | "python";
   primary: string;
-  /** "ID" または "ID:重み"（wisdom init の --secondary にそのまま渡す） */
+  /** "ID" または "ID:重み"（torus init の --secondary にそのまま渡す） */
   secondary: string[];
   steps: string[];
   expected: { functional: number; robustness: number };
@@ -480,9 +480,9 @@ async function mustGit(work: string, args: string[]): Promise<string> {
   return result.stdout.trim();
 }
 
-function initArgs(task: Task, work: string, wisdomDir?: string): string[] {
+function initArgs(task: Task, work: string, torusDir?: string): string[] {
   const args = [CLI, "init", "--project", work];
-  if (wisdomDir !== undefined) args.push("--wisdom-dir", wisdomDir);
+  if (torusDir !== undefined) args.push("--torus-dir", torusDir);
   args.push("--primary", task.primary);
   for (const secondary of task.secondary) args.push("--secondary", secondary);
   return args;
@@ -490,8 +490,8 @@ function initArgs(task: Task, work: string, wisdomDir?: string): string[] {
 
 function claudeArgs(prompt: string, model: string, condition: Condition): string[] {
   const args = ["-p", prompt, "--output-format", "json", "--model", model, "--permission-mode", "acceptEdits", "--setting-sources", "project"];
-  if (condition === "wisdom") args.push("--plugin-dir", PLUGIN_ROOT);
-  args.push("--allowedTools", ...ALLOWED_TOOLS, ...(condition === "wisdom" ? [WISDOM_TOOL] : []));
+  if (condition === "torus") args.push("--plugin-dir", PLUGIN_ROOT);
+  args.push("--allowedTools", ...ALLOWED_TOOLS, ...(condition === "torus" ? [TORUS_TOOL] : []));
   return args;
 }
 
@@ -499,8 +499,8 @@ function claudeEnv(condition: Condition): NodeJS.ProcessEnv {
   const env: NodeJS.ProcessEnv = { ...process.env };
   // 親のセッションの情報を持ち込まない
   for (const name of ["CLAUDECODE", "CLAUDE_PROJECT_DIR", "CLAUDE_PLUGIN_ROOT"]) delete env[name];
-  if (condition === "wisdom") {
-    // プラグインの bin/ にある wisdom コマンドを Bash から呼べるようにする
+  if (condition === "torus") {
+    // プラグインの bin/ にある torus コマンドを Bash から呼べるようにする
     env.PATH = `${path.join(PLUGIN_ROOT, "bin")}${path.delimiter}${process.env.PATH ?? ""}`;
   }
   return env;
@@ -567,13 +567,13 @@ async function runStep(job: Job, options: Options, work: string, runDir: string,
 
 async function measureViolations(task: Task, work: string, runDir: string, base: string): Promise<Measure> {
   if (!fs.existsSync(CLI)) return emptyMeasure("src/cli.ts がまだありません（measure_error）");
-  const wisdomDir = path.join(runDir, "measure");
+  const torusDir = path.join(runDir, "measure");
   const env = { ...process.env, NO_COLOR: "1" };
 
-  const init = await runCommand("node", initArgs(task, work, wisdomDir), { cwd: PLUGIN_ROOT, env, timeoutMs: SETUP_TIMEOUT_MS });
+  const init = await runCommand("node", initArgs(task, work, torusDir), { cwd: PLUGIN_ROOT, env, timeoutMs: SETUP_TIMEOUT_MS });
   if (init.code !== 0) return emptyMeasure(`測定用の init に失敗しました：${clip(init.spawnError ?? (init.stderr || init.stdout))}`);
 
-  const checkArgs = [CLI, "check", "--project", work, "--wisdom-dir", wisdomDir, "--diff", base, "--json", "--fail-on", "never"];
+  const checkArgs = [CLI, "check", "--project", work, "--torus-dir", torusDir, "--diff", base, "--json", "--fail-on", "never"];
   const check = await runCommand("node", checkArgs, { cwd: PLUGIN_ROOT, env, timeoutMs: SETUP_TIMEOUT_MS });
   fs.writeFileSync(path.join(runDir, "check.json"), check.stdout);
   if (check.code !== 0) return emptyMeasure(`測定用の check に失敗しました：${clip(check.spawnError ?? (check.stderr || check.stdout))}`);
@@ -715,7 +715,7 @@ async function executeRun(job: Job, options: Options): Promise<RunResult> {
   return result;
 }
 
-/** repo/ を複製し、git の基準 commit を作る（wisdom 条件では先に init する） */
+/** repo/ を複製し、git の基準 commit を作る（torus 条件では先に init する） */
 async function prepare(job: Job, options: Options, result: RunResult, runDir: string, work: string): Promise<void> {
   fs.rmSync(runDir, { recursive: true, force: true });
   fs.mkdirSync(runDir, { recursive: true });
@@ -723,12 +723,12 @@ async function prepare(job: Job, options: Options, result: RunResult, runDir: st
 
   try {
     await mustGit(work, ["init", "-q"]);
-    if (job.condition === "wisdom") {
+    if (job.condition === "torus") {
       const init = await runCommand("node", initArgs(job.task, work), { cwd: PLUGIN_ROOT, timeoutMs: SETUP_TIMEOUT_MS });
       if (init.code !== 0) {
         const detail = clip(init.spawnError ?? (init.stderr || init.stdout));
-        if (!options.dryRun) throw new Error(`wisdom init に失敗したため、この実行は行いません：${detail}`);
-        result.errors.push(`init_error：wisdom init に失敗しました（--dry-run なので続けます）：${detail}`);
+        if (!options.dryRun) throw new Error(`torus init に失敗したため、この実行は行いません：${detail}`);
+        result.errors.push(`init_error：torus init に失敗しました（--dry-run なので続けます）：${detail}`);
       }
     }
     await mustGit(work, ["add", "-A"]);
@@ -768,7 +768,7 @@ async function finalize(job: Job, result: RunResult, runDir: string, work: strin
 
   const status = await git(work, ["status", "--porcelain", "-uall"]);
   result.changedFiles = status.stdout.split("\n").filter((line) => line.trim() !== "").slice(0, 60);
-  if (job.condition === "wisdom") result.ledgerLines = countLines(path.join(work, ".wisdom", "ledger.jsonl"));
+  if (job.condition === "torus") result.ledgerLines = countLines(path.join(work, ".torus", "ledger.jsonl"));
 
   result.measure = await measureViolations(job.task, work, runDir, result.baseCommit ?? "HEAD");
   if (!result.measure.ok) result.errors.push(`measure_error：${result.measure.error ?? "不明"}`);
@@ -848,7 +848,7 @@ function makeCell(task: string, condition: Condition, runs: RunResult[]): Cell {
     costUsd: mean(runs.map((run) => run.totals.costUsd)),
     durationMs: mean(runs.map((run) => run.totals.durationMs)),
     turns: mean(runs.map((run) => run.totals.turns)),
-    ledgerLines: condition === "wisdom" ? mean(runs.map((run) => run.ledgerLines ?? 0)) : null,
+    ledgerLines: condition === "torus" ? mean(runs.map((run) => run.ledgerLines ?? 0)) : null,
   };
 }
 
@@ -875,7 +875,7 @@ function sumCells(condition: Condition, cells: Cell[]): Cell | null {
     costUsd: sum(cells.map((cell) => cell.costUsd)),
     durationMs: sum(cells.map((cell) => cell.durationMs)),
     turns: sum(cells.map((cell) => cell.turns)),
-    ledgerLines: condition === "wisdom" ? sum(cells.map((cell) => cell.ledgerLines ?? 0)) : null,
+    ledgerLines: condition === "torus" ? sum(cells.map((cell) => cell.ledgerLines ?? 0)) : null,
   };
 }
 
@@ -885,7 +885,7 @@ function rateOf(part: { pass: number; expected: number }): number | null {
 
 function judge(overall: Record<Condition, Cell | null>, dryRun: boolean): Verdict {
   const base = overall.baseline;
-  const wisdom = overall.wisdom;
+  const torus = overall.torus;
   const verdict: Verdict = {
     comparable: false,
     note: "",
@@ -902,19 +902,19 @@ function judge(overall: Record<Condition, Cell | null>, dryRun: boolean): Verdic
     verdict.note = "--dry-run は reference を適用しただけなので、判定しません（隠しテストが正しいかの確認用です）";
     return verdict;
   }
-  if (base === null || wisdom === null) {
-    verdict.note = "baseline と wisdom の両方を実行したときだけ判定します";
+  if (base === null || torus === null) {
+    verdict.note = "baseline と torus の両方を実行したときだけ判定します";
     return verdict;
   }
   verdict.comparable = true;
-  if (base.score > 0) verdict.scoreReduction = 1 - wisdom.score / base.score;
+  if (base.score > 0) verdict.scoreReduction = 1 - torus.score / base.score;
   const baseRate = rateOf(base.functional);
-  const wisdomRate = rateOf(wisdom.functional);
-  if (baseRate !== null && wisdomRate !== null) verdict.functionalDiff = wisdomRate - baseRate;
-  if (base.costUsd > 0) verdict.costIncrease = wisdom.costUsd / base.costUsd - 1;
-  if (base.tokens > 0) verdict.tokenIncrease = wisdom.tokens / base.tokens - 1;
+  const torusRate = rateOf(torus.functional);
+  if (baseRate !== null && torusRate !== null) verdict.functionalDiff = torusRate - baseRate;
+  if (base.costUsd > 0) verdict.costIncrease = torus.costUsd / base.costUsd - 1;
+  if (base.tokens > 0) verdict.tokenIncrease = torus.tokens / base.tokens - 1;
 
-  verdict.halvedScore = base.score > 0 ? wisdom.score <= base.score / 2 : null;
+  verdict.halvedScore = base.score > 0 ? torus.score <= base.score / 2 : null;
   verdict.functionalHeld = verdict.functionalDiff === null ? null : verdict.functionalDiff >= -1e-9;
   verdict.costWithinLimit = verdict.costIncrease === null ? null : verdict.costIncrease <= 0.2;
   const checks = [verdict.halvedScore, verdict.functionalHeld, verdict.costWithinLimit];
@@ -934,12 +934,12 @@ function aggregate(runs: RunResult[], options: Options, taskIds: string[]): Aggr
   }
   const overall = {
     baseline: sumCells("baseline", cells.filter((cell) => cell.condition === "baseline")),
-    wisdom: sumCells("wisdom", cells.filter((cell) => cell.condition === "wisdom")),
+    torus: sumCells("torus", cells.filter((cell) => cell.condition === "torus")),
   };
   const principles: Record<string, Record<Condition, number>> = {};
   for (const run of runs) {
     for (const [principle, count] of Object.entries(run.measure.byPrinciple)) {
-      principles[principle] ??= { baseline: 0, wisdom: 0 };
+      principles[principle] ??= { baseline: 0, torus: 0 };
       principles[principle][run.condition] += count;
     }
   }
@@ -1005,7 +1005,7 @@ const TABLE_HEAD =
 function renderSummary(runs: RunResult[], options: Options, tasks: Task[], result: Aggregate, finishedAt: Date): string {
   const lines: string[] = [];
   const dry = options.dryRun;
-  lines.push("# AI Code Wisdom 評価結果", "");
+  lines.push("# Torus Code 評価結果", "");
   lines.push(`- 実行：${options.dryRun ? "dry-run（claude は呼ばず、reference を適用）" : "通常実行"} ／ 終了 ${finishedAt.toLocaleString("ja-JP")}`);
   lines.push(`- モデル：${dry ? "—" : options.model} ／ 条件：${options.conditions.join(", ")} ／ 繰り返し：${options.reps} ／ 課題：${tasks.length} 件`);
   lines.push(`- 出力先：${options.out}`);
@@ -1022,9 +1022,9 @@ function renderSummary(runs: RunResult[], options: Options, tasks: Task[], resul
   }
 
   lines.push("## 全体", "");
-  const { baseline, wisdom } = result.overall;
+  const { baseline, torus } = result.overall;
   lines.push(TABLE_HEAD);
-  for (const cell of [baseline, wisdom]) if (cell !== null) lines.push(`| ${cellRow(cell, dry)} |`);
+  for (const cell of [baseline, torus]) if (cell !== null) lines.push(`| ${cellRow(cell, dry)} |`);
   lines.push("");
 
   const verdict = result.verdict;
@@ -1046,9 +1046,9 @@ function renderSummary(runs: RunResult[], options: Options, tasks: Task[], resul
 
   const principleNames = Object.keys(result.principles).sort();
   if (principleNames.length > 0) {
-    lines.push("### 原則ごとの違反数（全実行の合計）", "", "| 原則 | baseline | wisdom |", "|---|---|---|");
+    lines.push("### 原則ごとの違反数（全実行の合計）", "", "| 原則 | baseline | torus |", "|---|---|---|");
     for (const name of principleNames) {
-      lines.push(`| ${name} | ${result.principles[name].baseline} | ${result.principles[name].wisdom} |`);
+      lines.push(`| ${name} | ${result.principles[name].baseline} | ${result.principles[name].torus} |`);
     }
     lines.push("");
   }

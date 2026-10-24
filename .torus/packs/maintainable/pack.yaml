@@ -1,5 +1,5 @@
 id: maintainable
-version: 0.1.1
+version: 0.1.2
 name: 保守性・長期運用重視型
 description: 何年も、人が入れ替わっても、安全に変更し続けられるコードを書く
 values: [責務の分離, 依存の管理, テストの充実, 後方互換性, 判断の記録]
@@ -16,7 +16,7 @@ languages: [typescript, python]
 enforcement:
   block: なし（mandatory の原則を含まないため）
   warn: すべての違反を AI に知らせる。severity が info のものは、作業の報告にまとめて載せるだけにする
-  allow_inline: '理由を書いたコメント（wisdom-allow <原則ID>: 理由）がある箇所は、例外として監査の一覧に載せる'
+  allow_inline: '理由を書いたコメント（torus-allow <原則ID>: 理由）がある箇所は、例外として監査の一覧に載せる'
 
 # MNT-TEST-003 / 004 はテストが対象なので、テストのパスは除外しない
 exclude_paths: []

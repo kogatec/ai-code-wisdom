@@ -9,11 +9,11 @@ const PROJECT_MARKERS = ["package.json", "tsconfig.json", "pyproject.toml", "set
 const SKIPPED_DIRS = new Set(["node_modules", "dist", "build", "venv", "__pycache__"]);
 
 const FIRST_RUN_OFFER = [
-  "[AI Code Wisdom] このプロジェクトは、まだ設計スタイルが設定されていません。このプロジェクトで聞くのは今回だけです。",
+  "[Torus Code] このプロジェクトは、まだ設計スタイルが設定されていません。このプロジェクトで聞くのは今回だけです。",
   "依頼に取りかかる前に、次の順で進めてください。",
-  "1. Skill ツールで ai-code-wisdom:init を呼び、その手順で主スタイル・副スタイル・段階を AskUserQuestion で聞く。最初の質問（主スタイル）の選択肢に「今は設定しない」を加える",
-  "2. 「今は設定しない」が選ばれたら、何も設定しない。あとから設定するときは /ai-code-wisdom:init を使えることを一言伝える",
-  "3. 設定が済んだら（または設定しなかったら）、元の依頼を進める。設定はあとから /ai-code-wisdom:style で変えられる",
+  "1. Skill ツールで torus-code:init を呼び、その手順で主スタイル・副スタイル・段階を AskUserQuestion で聞く。最初の質問（主スタイル）の選択肢に「今は設定しない」を加える",
+  "2. 「今は設定しない」が選ばれたら、何も設定しない。あとから設定するときは /torus-code:init を使えることを一言伝える",
+  "3. 設定が済んだら（または設定しなかったら）、元の依頼を進める。設定はあとから /torus-code:style で変えられる",
 ].join("\n");
 
 interface FirstRunState {
@@ -23,7 +23,7 @@ interface FirstRunState {
 
 /** リポジトリを汚さないよう、記録はホームに置く */
 function stateFile(home: string): string {
-  return path.join(home, ".ai-code-wisdom", "first-run.json");
+  return path.join(home, ".torus-code", "first-run.json");
 }
 
 function isPlainObject(v: unknown): v is Record<string, string> {

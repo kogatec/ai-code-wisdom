@@ -47,15 +47,15 @@ test("takeFirstRunOffer：コードのフォルダで1回目だけ案内を返�
 
   const offer = takeFirstRunOffer(project, home);
   assert.ok(offer, "1回目は案内する");
-  assert.ok(offer.startsWith("[AI Code Wisdom] このプロジェクトは、まだ設計スタイルが設定されていません"), offer);
-  assert.ok(offer.includes("ai-code-wisdom:init"), offer);
+  assert.ok(offer.startsWith("[Torus Code] このプロジェクトは、まだ設計スタイルが設定されていません"), offer);
+  assert.ok(offer.includes("torus-code:init"), offer);
   assert.ok(offer.includes("今は設定しない"), offer);
-  assert.ok(offer.includes("/ai-code-wisdom:style"), offer);
+  assert.ok(offer.includes("/torus-code:style"), offer);
   assert.equal(takeFirstRunOffer(project, home), null, "2回目は聞かない");
 
-  const state = JSON.parse(fs.readFileSync(path.join(home, ".ai-code-wisdom", "first-run.json"), "utf8"));
+  const state = JSON.parse(fs.readFileSync(path.join(home, ".torus-code", "first-run.json"), "utf8"));
   assert.ok(state.projects[fs.realpathSync(project)], "プロジェクトの実パスで記録する");
-  assert.ok(!fs.existsSync(path.join(project, ".wisdom")), "プロジェクトには何も書かない");
+  assert.ok(!fs.existsSync(path.join(project, ".torus")), "プロジェクトには何も書かない");
 
   const other = tmpDir();
   write(other, "main.py", "print(1)\n");
@@ -65,9 +65,9 @@ test("takeFirstRunOffer：コードのフォルダで1回目だけ案内を返�
 test("takeFirstRunOffer：コードのないフォルダでは案内も記録もしない。記録が壊れていても案内し、記録し直す", () => {
   const home = tmpDir();
   assert.equal(takeFirstRunOffer(tmpDir(), home), null);
-  assert.ok(!fs.existsSync(path.join(home, ".ai-code-wisdom")));
+  assert.ok(!fs.existsSync(path.join(home, ".torus-code")));
 
-  const file = path.join(home, ".ai-code-wisdom", "first-run.json");
+  const file = path.join(home, ".torus-code", "first-run.json");
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, "{");
   const project = tmpDir();

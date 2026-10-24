@@ -1,126 +1,128 @@
-# AI Code Wisdom
+# Torus Code
 
-ユーザーが選んだ設計スタイル（セキュリティ重視・読みやすさ重視・長期保守重視など）を、AI が**開発から保守まで守り続ける**ための原則パック・自動検査・Claude Code プラグイン。
+Principle packs, automated checks, and a Claude Code plugin that keep AI coding agents true to the design style you choose (security-first, readability-first, long-term maintainability, and so on) **from development through maintenance**.
 
-- 方針はプロンプトではなく、**毎回動く仕組み**で守らせる（セッション開始・依頼・ファイル編集・作業終了のたびにフックが動く）
-- 原則は「検査方法を持つデータ」。検査できない標語は採用しない
-- 設定はリポジトリ内の `.wisdom/` に置き、パックはプロジェクトに複製して版を固定する（プラグインを更新しても勝手に挙動が変わらない）
+- Policies are enforced by **mechanisms that run every time**, not by prompts alone: hooks fire at session start, on every request, on every file edit, and when the work ends.
+- A principle is "data with a way to check it". Slogans that cannot be checked are not adopted.
+- Settings live in `.torus/` inside your repository, and packs are copied into the project with pinned versions, so updating the plugin never changes behavior behind your back.
 
-設計の考え方は [AI-Code-Wisdom-設計書.md](AI-Code-Wisdom-設計書.md)、実装の契約は [docs/実装仕様.md](docs/実装仕様.md) を参照。
+The design rationale is in [Torus-Code-設計書.md](Torus-Code-設計書.md) and the implementation contract is in [docs/実装仕様.md](docs/実装仕様.md) (both in Japanese). The CLI output and the messages shown inside Claude Code sessions are currently in Japanese as well.
 
-## 必要なもの
+## Requirements
 
-- Node.js 23.6 以上（`.ts` をビルドせずに直接実行する。Node 26 で確認）
-- Claude Code（プラグインとして使う場合）
+- Node.js 23.6 or later (`.ts` files run directly without a build step; tested on Node 26)
+- Claude Code (when used as a plugin)
 
 ```bash
 npm install
 ```
 
-## Claude Code で使う
+## Using it with Claude Code
 
-このディレクトリがそのままプラグインです。
+This directory is the plugin itself.
 
 ```bash
-claude --plugin-dir /path/to/ai-code-wisdom
+claude --plugin-dir /path/to/torus-code
 ```
 
-まだ設定していないコードのフォルダ（git リポジトリか、TypeScript / Python のプロジェクト）で最初にメッセージを送ると、依頼に取りかかる前に一度だけ、設計スタイル（主・副・段階）を聞かれます。「今は設定しない」を選んでも、そのプロジェクトでは二度と聞きません。聞いた記録はリポジトリではなく `~/.ai-code-wisdom/first-run.json` に残ります。ホームディレクトリそのものや、コードのないフォルダでは聞きません。
+The first time you send a message in a code folder that is not configured yet (a git repository, or a TypeScript / Python project), Claude asks you once, before working on your request, which design style to use (primary, secondary, and phase). If you choose "not now", you will not be asked again in that project. The fact that you were asked is recorded in `~/.torus-code/first-run.json`, not in your repository. You are never asked in your home directory itself or in folders without code.
 
-あとから設定・変更するときは、次のコマンドを使います。
+To set up or change the configuration later, use these commands:
 
-| コマンド | 内容 |
+| Command | What it does |
 |---|---|
-| `/ai-code-wisdom:init` | 主スタイル・副スタイル・段階（本番／試作）を選んで設定する |
-| `/ai-code-wisdom:style` | 設定を確認・変更する |
-| `/ai-code-wisdom:check` | 変更した部分を検査して直す |
-| `/ai-code-wisdom:audit` | プロジェクト全体を監査する |
-| `/ai-code-wisdom:explain <ID>` | 原則の理由・検査方法・例を見る |
+| `/torus-code:init` | Choose the primary style, secondary styles, and phase (production / prototype) |
+| `/torus-code:style` | Show or change the configuration |
+| `/torus-code:check` | Check what you changed and fix violations |
+| `/torus-code:audit` | Audit the whole project |
+| `/torus-code:explain <ID>` | Show a principle's rationale, how it is checked, and examples |
 
-設定したあとは、次のことが自動で起きます。
+Once configured, the following happens automatically:
 
-| 層 | いつ | 何をするか |
+| Layer | When | What |
 |---|---|---|
-| L0 | セッション開始時（会話の圧縮後も） | 必須の原則・優先して守る原則・衝突時の優先・進め方を渡す |
-| L1 | 依頼を送ったとき／ファイルを初めて書くとき | 依頼の種類（バグ修正・リファクタ・新規・機能追加・テスト）ごとの手順と、そのファイルで機械では検査できない確認事項を渡す。必須原則に反しそうな依頼には注意を出す |
-| L2 | ファイルを書いた直後 | 静的検査。**この編集で新しく入った**違反だけを返す。必須原則の違反は直すまで先へ進ませない（同じ違反は3回まで） |
-| L3 | 作業を終えるとき | この作業で入った必須違反が残っていれば止める。変更が 120 行以上なら、レビュー役（`wisdom-reviewer`）に1回レビューさせる |
-| L4 | いつでも | `wisdom audit`、`wisdom check --changed`、git の pre-commit |
+| L0 | At session start (and after context compaction) | Provides the mandatory principles, the prioritized principles, how conflicts are resolved, and the workflow |
+| L1 | When you send a request / when a file is first written | Provides steps for the kind of request (bug fix, refactor, new project, feature, tests) and the review points that cannot be checked mechanically for that file. Warns about requests that would likely violate a mandatory principle |
+| L2 | Right after a file is written | Static checks. Reports only the violations **introduced by that edit**. Mandatory violations block progress until fixed (up to 3 times for the same violation) |
+| L3 | When the work ends | Blocks if mandatory violations introduced in this work remain. If 120 or more lines changed, asks the reviewer agent (`torus-reviewer`) for one review |
+| L4 | Any time | `torus audit`, `torus check --changed`, and a git pre-commit hook |
 
-ほかに、MCP ツール（`wisdom_principles`・`wisdom_check`・`wisdom_explain`・`wisdom_record_decision`・`wisdom_styles`）と、作業手順のスキル（`wisdom-apply`）が入っています。
+The plugin also includes MCP tools (`torus_principles`, `torus_check`, `torus_explain`, `torus_record_decision`, `torus_styles`) and a workflow skill (`torus-apply`).
 
-## コマンドラインで使う
+If the configuration cannot be read, the session-start hook tells you that automatic checks are stopped and why, instead of failing silently.
+
+## Using the CLI
 
 ```bash
-bin/wisdom init --primary security-resilience --secondary maintainable
-bin/wisdom check --changed
-bin/wisdom audit
-bin/wisdom explain SEC-INJ-002
+bin/torus init --primary security-resilience --secondary maintainable
+bin/torus check --changed
+bin/torus audit
+bin/torus explain SEC-INJ-002
 ```
 
-`bin/wisdom help` で全コマンドを確認できます。Claude Code の中では、プラグインの `bin/` が PATH に入るので `wisdom` だけで動きます。
+Run `bin/torus help` for all commands. Inside Claude Code, the plugin's `bin/` is on `PATH`, so plain `torus` works.
 
-| 区分 | コマンド |
+| Group | Commands |
 |---|---|
-| 設定 | `init`・`styles`・`style`／`style set`・`status`・`principles`・`explain`・`update`・`lock` |
-| 検査 | `check`（既定は必須の違反があれば終了コード 1）・`audit`・`review-context` |
-| 連携 | `export agents-md`（AGENTS.md）・`export cursor`（.cursor/rules）・`export git-hook`（pre-commit） |
+| Configuration | `init`, `styles`, `style` / `style set`, `status`, `principles`, `explain`, `update`, `lock` |
+| Checks | `check` (exits with 1 on mandatory violations by default), `audit`, `review-context` |
+| Integrations | `export agents-md` (AGENTS.md), `export cursor` (.cursor/rules), `export git-hook` (pre-commit) |
 
-## 設計スタイル（原則パック）
+## Design styles (principle packs)
 
-| パック | 原則 | 静的ルール | 必須 |
+| Pack | Principles | Static rules | Mandatory |
 |---|---|---|---|
-| `security-resilience`（セキュリティ・障害耐性重視型） | 15 | 42 | 9 |
-| `simple-readable`（シンプル・可読性重視型） | 15 | 30 | 0 |
-| `maintainable`（保守性・長期運用重視型） | 15 | 32 | 0 |
+| `security-resilience` (security and resilience first) | 15 | 42 | 9 |
+| `simple-readable` (simplicity and readability first) | 15 | 30 | 0 |
+| `maintainable` (maintainability and long-term operation first) | 15 | 32 | 0 |
 
-- 必須（mandatory）の原則は、どのスタイルを選んでも外せません。ほかのパックを主スタイルにしても、`security-resilience` を副スタイルに入れれば適用されます。
-- 検査は ast-grep で行い、TypeScript（`.ts`・`.tsx`）と Python に対応しています。JavaScript には未対応です。
-- 各ルールには「検出すべき例・検出してはいけない例」のテストがあります（`npm run test:rules`）。
+- Mandatory principles cannot be turned off, whichever style you choose. They also apply when another pack is primary and `security-resilience` is a secondary style.
+- Checks run on ast-grep and support TypeScript (`.ts`, `.tsx`) and Python. JavaScript is not supported yet.
+- Every rule has tests with examples that must and must not be detected (`npm run test:rules`).
 
-## 設定ファイル（`.wisdom/`）
+## Configuration files (`.torus/`)
 
-| ファイル | 内容 | コミット |
+| File | Contents | Commit it? |
 |---|---|---|
-| `profile.yaml` | 主・副スタイル、段階、レビュー、無効にする原則、除外パス | する |
-| `lock.json` | 使っているパックの版とハッシュ | する |
-| `packs/` | プロジェクトに複製したパック（必要なら編集して `wisdom lock`） | する |
-| `decisions.md` | 原則の衝突や設計判断の記録 | する |
-| `cache/`・`ledger.jsonl`・`audit-history.jsonl` | キャッシュ・作業の記録・監査の履歴 | しない（自動で除外） |
+| `profile.yaml` | Primary and secondary styles, phase, review mode, disabled principles, excluded paths | Yes |
+| `lock.json` | Versions and hashes of the packs in use | Yes |
+| `packs/` | Packs copied into the project (edit them if needed, then run `torus lock`) | Yes |
+| `decisions.md` | Records of principle conflicts and design decisions | Yes |
+| `cache/`, `ledger.jsonl`, `audit-history.jsonl` | Cache, work log, and audit history | No (ignored automatically) |
 
-本当に例外が必要な箇所だけ、その行か直前の行に理由付きで書きます。理由がない例外は無効です。
+When an exception is truly needed, write it on that line or the line above, with a reason. Exceptions without a reason are ignored.
 
 ```ts
-// wisdom-allow SEC-INJ-003: 固定の文字列だけを渡しており、外部入力は入らない
+// torus-allow SEC-INJ-003: only a fixed string is passed; no external input reaches it
 execSync(`git rev-parse ${FIXED_REF}`);
 ```
 
-## 評価
+## Evaluation
 
-同じ依頼を、プラグインなし（baseline）とあり（wisdom）の Claude Code に実行させて比べます。課題は6つ（TypeScript 3・Python 3）で、それぞれ2段階の依頼、依頼どおりに動くかの隠しテスト、原則が守られていれば通る堅牢さの隠しテスト、模範解答があります。
-
-```bash
-node eval/run.ts --dry-run                      # claude を呼ばずに、模範解答で隠しテストが正しいかを確かめる
-node eval/run.ts --tasks ts-user-search --reps 1 # 実際に claude を動かす（ログイン済みの端末で）
-```
-
-結果は `eval/results/<日時>/summary.md` に出ます。完了条件は「違反点が半分以下・機能テストの通過率が下がらない・費用の増加 20% 以内」です。最新の結果は [docs/評価結果.md](docs/評価結果.md) を参照。
-
-## 開発
+The same requests are given to Claude Code without the plugin (baseline) and with it (torus), and the results are compared. There are six tasks (three TypeScript, three Python). Each has a two-step request, hidden tests for the requested behavior, hidden robustness tests that pass only when the principles are followed, and a reference solution.
 
 ```bash
-npm run typecheck   # 型チェック
-npm test            # 単体・結合テスト（約3分）
-npm run test:rules  # パックのルールテスト
-sh scripts/smoke-plugin.sh  # 実際の Claude Code でフックが動くかの確認（ログイン済みの端末で）
+node eval/run.ts --dry-run                      # validate the hidden tests against the reference solutions without calling claude
+node eval/run.ts --tasks ts-user-search --reps 1 # actually run claude (in a logged-in terminal)
 ```
 
-## 制約
+Results are written to `eval/results/<timestamp>/summary.md`. The success criteria are: the violation score is halved or better, the functional pass rate does not drop, and the cost increase stays within 20%.
 
-- 静的検査は、問題が1つの式に直接書かれている場合しか見つけられません（変数を経由すると見逃すことがある）。その分はレビュー役と L1 の確認事項で補います。
-- しきい値（関数 60 行など）はルールに直接書かれています。変えるときは `.wisdom/packs/` のルールを編集して `wisdom lock` を実行します。
-- 原則の根拠は、今は CWE や既存ツールのルールへの参照だけです。公開リポジトリからの抽出（設計書の Phase 3）は未実装です。
+## Development
 
-## ライセンス
+```bash
+npm run typecheck   # type check
+npm test            # unit and integration tests (about 3 minutes)
+npm run test:rules  # rule tests for the packs
+sh scripts/smoke-plugin.sh  # check that the hooks run in real Claude Code (in a logged-in terminal)
+```
+
+## Limitations
+
+- Static checks only find problems written directly in a single expression (they may miss problems that go through a variable). The reviewer agent and the L1 review points cover the rest.
+- Thresholds (such as 60 lines per function) are written directly in the rules. To change them, edit the rules in `.torus/packs/` and run `torus lock`.
+- The evidence behind the principles is currently limited to references to CWE and existing linter rules. Extraction from public repositories (Phase 3 in the design document) is not implemented yet.
+
+## License
 
 [MIT](LICENSE)

@@ -85,7 +85,7 @@ function loadSelectedPacks(paths: ProjectPaths, profile: Profile): { pack: Pack;
     seen.add(id);
     const dir = path.join(paths.packsDir, id);
     if (!fs.existsSync(path.join(dir, "pack.yaml"))) {
-      throw new Error(`パック ${id} がプロジェクトにありません。wisdom style set で選び直してください`);
+      throw new Error(`パック ${id} がプロジェクトにありません。torus style set で選び直してください`);
     }
     return { pack: loadPack(dir), weight };
   });

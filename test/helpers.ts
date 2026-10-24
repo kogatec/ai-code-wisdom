@@ -7,7 +7,7 @@ import { initProject, type StyleChoice } from "../src/core/project.ts";
 import type { Compiled } from "../src/core/resolve.ts";
 
 export const CLI = path.join(PLUGIN_ROOT, "src", "cli.ts");
-export const BIN = path.join(PLUGIN_ROOT, "bin", "wisdom");
+export const BIN = path.join(PLUGIN_ROOT, "bin", "torus");
 
 const created: string[] = [];
 process.on("exit", () => {
@@ -15,7 +15,7 @@ process.on("exit", () => {
 });
 
 export function tmpDir(): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "wisdom-"));
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "torus-"));
   created.push(dir);
   return dir;
 }
@@ -56,7 +56,7 @@ export interface RunResult {
   stderr: string;
 }
 
-/** 子プロセスのホーム。初回設定の記録（~/.ai-code-wisdom）が、本物のホームに書かれないようにする */
+/** 子プロセスのホーム。初回設定の記録（~/.torus-code）が、本物のホームに書かれないようにする */
 const TEST_HOME = tmpDir();
 
 /** src/cli.ts を子プロセスで実行する */

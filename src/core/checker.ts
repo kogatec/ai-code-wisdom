@@ -39,13 +39,13 @@ export interface CheckResult {
 }
 
 const SEVERITY_ORDER: Record<string, number> = { error: 0, warning: 1, info: 2, hint: 3 };
-const EXCLUDE_GLOBS = ["node_modules", ".git", "dist", "build", ".venv", "venv", "__pycache__", ".wisdom"].map(
+const EXCLUDE_GLOBS = ["node_modules", ".git", "dist", "build", ".venv", "venv", "__pycache__", ".torus"].map(
   (d) => `!**/${d}/**`,
 );
-const EXCLUDED_DIR_RE = /(^|\/)(node_modules|\.git|dist|build|\.venv|venv|__pycache__|\.wisdom)\//;
+const EXCLUDED_DIR_RE = /(^|\/)(node_modules|\.git|dist|build|\.venv|venv|__pycache__|\.torus)\//;
 
 const ID_RE = "[A-Z][A-Z0-9]*(?:-[A-Z0-9]+)*";
-const ALLOW_RE = new RegExp(`wisdom-allow\\s+(${ID_RE}(?:\\s*,\\s*${ID_RE})*)(?:\\s*[:：]\\s*(.*))?`);
+const ALLOW_RE = new RegExp(`torus-allow\\s+(${ID_RE}(?:\\s*,\\s*${ID_RE})*)(?:\\s*[:：]\\s*(.*))?`);
 
 export function astGrepBin(): string {
   const local = path.join(PLUGIN_ROOT, "node_modules", ".bin", "ast-grep");
@@ -112,7 +112,7 @@ function compareFindings(a: Finding, b: Finding): number {
 
 type AllowVerdict = { kind: "none" } | { kind: "invalid" } | { kind: "waived"; reason: string };
 
-/** その行か直前の行の wisdom-allow を調べる */
+/** その行か直前の行の torus-allow を調べる */
 function allowFor(lines: string[], finding: Finding): AllowVerdict {
   let invalid = false;
   for (const idx of [finding.line - 1, finding.line - 2]) {
